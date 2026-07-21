@@ -853,17 +853,12 @@ for (let i = 0; i < 18; i++) {
 
 
 /* =========================
-   ITINÉRAIRE (Salle des fêtes Kenza)
+   ITINÉRAIRE (Lien Google Maps mis à jour)
 ========================= */
 
 document
   .getElementById("mapBtn")
   .addEventListener("click", function() {
-
-    const location =
-      encodeURIComponent(
-        "Salle des fêtes Kenza, 21 Rue Chahid Missoum Bouhadjmi, Bir El Djir, Algérie"
-      );
 
     const isIOS =
       /iPad|iPhone|iPod/.test(
@@ -874,15 +869,11 @@ document
 
     if (isIOS) {
 
-      url =
-        "https://maps.apple.com/?q="
-        + location;
+      url = "https://maps.apple.com/?q=Salle+des+fêtes+Kenza,+Bir+El+Djir";
 
     } else {
 
-      url =
-        "https://www.google.com/maps/search/?api=1&query="
-        + location;
+      url = "https://maps.google.com/maps/place//data=!4m2!3m1!1s0xd7e63069fc63c37:0x85d7f5b71560a4ea?entry=s&sa=X&ved=2ahUKEwjB9-HL3eSVAxVlxgIHHabHBQgQ4kB6BAgbEAA&hl=fr";
 
     }
 
