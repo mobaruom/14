@@ -853,38 +853,15 @@ for (let i = 0; i < 18; i++) {
 
 
 /* =========================
-   ITINÉRAIRE (GOOGLE MAPS CORRIGÉ - ORAN)
+   ITINÉRAIRE (RECHERCHE ANDROID / GOOGLE MAPS)
 ========================= */
 
 document
   .getElementById("mapBtn")
   .addEventListener("click", function() {
 
-    const location =
-      encodeURIComponent(
-        "Salle des fêtes Kenza, Oran, Algérie"
-      );
-
-    const isIOS =
-      /iPad|iPhone|iPod/.test(
-        navigator.userAgent
-      );
-
-    let url;
-
-    if (isIOS) {
-
-      url =
-        "https://maps.apple.com/?q="
-        + location;
-
-    } else {
-
-      url =
-        "https://www.google.com/maps/search/?api=1&query="
-        + location;
-
-    }
+    // On utilise directement la recherche Google Maps pour éviter les erreurs de pays
+    const url = "https://www.google.com/maps/search/?api=1&query=Salle+des+fêtes+Kenza+Oran";
 
     window.open(url, "_blank");
 
