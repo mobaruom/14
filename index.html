@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bouthaina & Yasser — Le mariage</title>
+<title>Yasser & Bouthaina — Le mariage</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -513,9 +513,9 @@ footer {
     </div>
 
     <h1 class="names display">
-      Bouthaina
-      <span>&</span>
       Yasser
+      <span>&</span>
+      Bouthaina
     </h1>
 
     <p class="hero-subtitle">
@@ -527,7 +527,7 @@ footer {
     </p>
 
     <p class="hero-location">
-      Complexe Thermal Hammam Guergour
+      Salle des fêtes Kenza
     </p>
 
     <!-- COMPTE À REBOURS -->
@@ -581,7 +581,7 @@ footer {
 
       <img
         src="https://i.postimg.cc/ZqJ82Qv5/60C53ED0-BB84-47E9-B4D0-8BF4E5D2099A.png"
-        alt="Bouthaina et Yasser"
+        alt="Yasser et Bouthaina"
       >
 
     </div>
@@ -668,7 +668,7 @@ footer {
         </span>
 
         <span class="detail-value">
-          À partir de 10h00
+          À partir de 21h00
         </span>
 
       </div>
@@ -681,7 +681,7 @@ footer {
         </span>
 
         <span class="detail-value">
-          Complexe Thermal Hammam Guergour
+          Salle des fêtes Kenza
         </span>
 
       </div>
@@ -717,11 +717,11 @@ footer {
     </p>
 
     <p class="signature script">
-      Bouthaina & Yasser
+      Yasser & Bouthaina
     </p>
 
     <p class="footer-date">
-      14 Août 2026 · Hammam Guergour
+      14 Août 2026 · Salle des fêtes Kenza
     </p>
 
   </div>
@@ -732,11 +732,11 @@ footer {
 <script>
 
 /* =========================
-   COMPTE À REBOURS
+   COMPTE À REBOURS (21h00)
 ========================= */
 
 const weddingDate =
-  new Date("2026-08-14T10:00:00+01:00").getTime();
+  new Date("2026-08-14T21:00:00+01:00").getTime();
 
 function updateCountdown() {
 
@@ -853,7 +853,7 @@ for (let i = 0; i < 18; i++) {
 
 
 /* =========================
-   ITINÉRAIRE
+   ITINÉRAIRE (Salle des fêtes Kenza)
 ========================= */
 
 document
@@ -862,7 +862,7 @@ document
 
     const location =
       encodeURIComponent(
-        "Complexe Thermal Hammam Guergour"
+        "Salle des fêtes Kenza, 21 Rue Chahid Missoum Bouhadjmi, Bir El Djir, Algérie"
       );
 
     const isIOS =
@@ -892,7 +892,7 @@ document
 
 
 /* =========================
-   AJOUTER AU CALENDRIER
+   AJOUTER AU CALENDRIER (21h00)
 ========================= */
 
 document
@@ -900,24 +900,24 @@ document
   .addEventListener("click", function() {
 
     const start =
-      "20260814T090000Z";
+      "20260814T200000Z"; // 21h00 en Algérie (UTC+1) = 20h00 UTC
 
     const end =
-      "20260814T180000Z";
+      "20260815T020000Z"; // Fin à 03h00 du matin
 
     const title =
       encodeURIComponent(
-        "Mariage de Bouthaina & Yasser"
+        "Mariage de Yasser & Bouthaina"
       );
 
     const location =
       encodeURIComponent(
-        "Complexe Thermal Hammam Guergour"
+        "Salle des fêtes Kenza, Bir El Djir, Algérie"
       );
 
     const details =
       encodeURIComponent(
-        "Célébration du mariage de Bouthaina et Yasser"
+        "Célébration du mariage de Yasser et Bouthaina"
       );
 
     const calendarUrl =
