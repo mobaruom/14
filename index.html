@@ -853,7 +853,7 @@ for (let i = 0; i < 18; i++) {
 
 
 /* =========================
-   ITINÉRAIRE (Lien Google Maps mis à jour)
+   ITINÉRAIRE (Lien Google Maps Oran)
 ========================= */
 
 document
@@ -869,11 +869,13 @@ document
 
     if (isIOS) {
 
-      url = "https://maps.apple.com/?q=Salle+des+fêtes+Kenza,+Bir+El+Djir";
+      // Pour iPhone / iPad
+      url = "https://maps.apple.com/?q=Salle+des+fêtes+Kenza,+Oran,+Algérie";
 
     } else {
 
-      url = "https://maps.google.com/maps/place//data=!4m2!3m1!1s0xd7e63069fc63c37:0x85d7f5b71560a4ea?entry=s&sa=X&ved=2ahUKEwjB9-HL3eSVAxVlxgIHHabHBQgQ4kB6BAgbEAA&hl=fr";
+      // Pour Android / Ordinateur
+      url = "https://maps.app.goo.gl/ZYg5LTi4GSAVPudw5?g_st=ic";
 
     }
 
@@ -903,7 +905,7 @@ document
 
     const location =
       encodeURIComponent(
-        "Salle des fêtes Kenza, Bir El Djir, Algérie"
+        "Salle des fêtes Kenza, Oran, Algérie"
       );
 
     const details =
