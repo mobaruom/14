@@ -161,6 +161,7 @@
     .log-error { color: #f87171; }
     .log-info { color: #60a5fa; }
     .log-warn { color: #fbbf24; }
+    .log-debug { color: #a78bfa; }
     .definition-card {
       background: #0f172a;
       border-radius: 10px;
@@ -287,6 +288,15 @@
       color: #94a3b8;
       margin-top: 4px;
     }
+    .debug-info {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #a78bfa;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -353,11 +363,14 @@
       <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:12px;">
         Format : <code>MATIERE: terme</code> (une par ligne). Matières : Management, Économie, Droit, RH
       </p>
-      <textarea id="termsInput" placeholder="Économie: Prix d'équilibre
-Économie: Inflation
+      <textarea id="termsInput" placeholder="Économie: Prix d'equilibre
+Economie: Inflation
 Management: Organigramme
 Droit: Contrat de travail
 RH: Recrutement"></textarea>
+      
+      <div class="debug-info hidden" id="debugInfo"></div>
+      
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="loadExample()">📋 Exemple</button>
         <button class="btn btn-primary" onclick="clearTerms()">🗑️ Vider</button>
@@ -405,14 +418,27 @@ RH: Recrutement"></textarea>
       }
     };
 
+    // Mapping des matières (tolérant aux variations)
+    const MATIERE_ALIASES = {
+      'economie': 'Économie',
+      'économie': 'Économie',
+      'eco': 'Économie',
+      'management': 'Management',
+      'mgmt': 'Management',
+      'droit': 'Droit',
+      'rh': 'RH',
+      'ressources humaines': 'RH',
+      'ressources_humaines': 'RH'
+    };
+
+    const MATIERES_VALIDES = new Set(['Management', 'Économie', 'Droit', 'RH']);
+
     let currentProvider = 'groq';
     let definitions = [];
     let isRunning = false;
     let shouldStop = false;
     let totalTokensUsed = 0;
     let totalTokensLimit = 1000000;
-
-    const MATIERES_VALIDES = new Set(['Management', 'Économie', 'Droit', 'RH']);
 
     // ─── INIT ───
     window.onload = () => {
@@ -438,7 +464,7 @@ RH: Recrutement"></textarea>
       });
       
       document.getElementById('modelNote').textContent = p === 'groq' 
-        ? '✅ Modèles actifs et disponibles sur Groq (août 2026)' 
+        ? '✅ Modèles actifs et disponibles sur Groq' 
         : '✅ Modèles gratuits disponibles sur OpenRouter';
     }
 
@@ -483,85 +509,130 @@ RH: Recrutement"></textarea>
       document.getElementById('tokenBar').style.background = pct > 80 ? '#ef4444' : pct > 50 ? '#f59e0b' : '#10b981';
     }
 
+    // ─── PARSER ULTRA-TOLÉRANT ───
+    function normalizeString(str) {
+      return str
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlève accents
+        .replace(/[''′`]/g, "'") // Normalise apostrophes
+        .replace(/[–—−]/g, '-') // Normalise tirets
+        .trim()
+        .toLowerCase();
+    }
+
     function parseTerms() {
       const input = document.getElementById('termsInput').value;
       localStorage.setItem('stmg_terms', input);
       
       const terms = [];
       const seen = new Set();
+      const debugLines = [];
       
-      input.split('\n').forEach(line => {
-        line = line.trim();
-        if (!line || !line.includes(':')) return;
+      const rawLines = input.split('\n');
+      
+      rawLines.forEach((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
         
-        const [matiere, ...termParts] = line.split(':');
-        const matiereTrim = matiere.trim();
-        const terme = termParts.join(':').trim();
+        debugLines.push(`Ligne ${idx+1}: "${trimmed}"`);
         
-        if (!MATIERES_VALIDES.has(matiereTrim)) {
-          log(`⚠️ Matière ignorée "${matiereTrim}" pour "${terme}"`, 'warn');
+        // Cherche le premier ":" ou "-" séparateur
+        let separatorIndex = trimmed.indexOf(':');
+        if (separatorIndex === -1) separatorIndex = trimmed.indexOf('-');
+        if (separatorIndex === -1) separatorIndex = trimmed.indexOf(' ');
+        
+        if (separatorIndex <= 0) {
+          debugLines.push(`  → Pas de séparateur trouvé, ignoré`);
           return;
         }
-        if (!terme) return;
         
-        const key = `${matiereTrim}:${terme.toLowerCase()}`;
+        const rawMatiere = trimmed.substring(0, separatorIndex).trim();
+        const rawTerme = trimmed.substring(separatorIndex + 1).trim();
+        
+        // Normalise la matière
+        const normalizedMatiere = normalizeString(rawMatiere);
+        const matiere = MATIERE_ALIASES[normalizedMatiere] || 
+                       (MATIERES_VALIDES.has(rawMatiere) ? rawMatiere : null);
+        
+        debugLines.push(`  → Matière brute: "${rawMatiere}" | Normalisée: "${normalizedMatiere}" | Mappée: ${matiere || 'NON TROUVÉE'}`);
+        debugLines.push(`  → Terme: "${rawTerme}"`);
+        
+        if (!matiere) {
+          debugLines.push(`  → ❌ Matière non reconnue`);
+          return;
+        }
+        if (!rawTerme) {
+          debugLines.push(`  → ❌ Terme vide`);
+          return;
+        }
+        
+        const key = `${matiere}:${rawTerme.toLowerCase()}`;
         if (seen.has(key)) {
-          log(`⏭️ Doublon ignoré : "${terme}" (${matiereTrim})`, 'warn');
+          debugLines.push(`  → ⏭️ Doublon ignoré`);
           return;
         }
         seen.add(key);
-        terms.push({ matiere: matiereTrim, terme });
+        terms.push({ matiere, terme: rawTerme });
+        debugLines.push(`  → ✅ AJOUTÉ`);
       });
+      
+      // Affiche debug
+      const debugEl = document.getElementById('debugInfo');
+      debugEl.textContent = debugLines.join('\n');
+      debugEl.classList.remove('hidden');
+      
+      log(`📊 Parser: ${terms.length} termes valides trouvés sur ${rawLines.length} lignes`, 'info');
       
       return terms;
     }
 
     function loadExample() {
-      document.getElementById('termsInput').value = `Économie: Prix d'équilibre
-Économie: Inflation
-Économie: PIB
-Économie: Chômage structurel
-Économie: Croissance économique
-Économie: Politique budgétaire
-Économie: Politique monétaire
-Économie: Fiscalité
-Économie: Commerce international
-Économie: Externalité
+      document.getElementById('termsInput').value = `Economie: Prix d'equilibre
+Economie: Inflation
+Economie: PIB
+Economie: Chomage structurel
+Economie: Croissance economique
+Economie: Politique budgetaire
+Economie: Politique monetaire
+Economie: Fiscalite
+Economie: Commerce international
+Economie: Externalite
 Management: Organigramme
 Management: Culture d'entreprise
 Management: Gestion de projet
 Management: Tableau de bord
 Management: Processus
 Management: Innovation
-Management: Stratégie d'entreprise
+Management: Strategie d'entreprise
 Management: Marketing mix
 Management: Benchmarking
-Management: Délégation
+Management: Delegation
 Droit: Contrat de travail
-Droit: Licenciement pour motif économique
-Droit: Durée légale du travail
+Droit: Licenciement pour motif economique
+Droit: Duree legale du travail
 Droit: Salaire minimum
-Droit: Sécurité sociale
-Droit: Représentant du personnel
-Droit: Droit de grève
-Droit: Responsabilité civile
-Droit: Propriété intellectuelle
-Droit: Droit des sociétés
+Droit: Securite sociale
+Droit: Representant du personnel
+Droit: Droit de greve
+Droit: Responsabilite civile
+Droit: Propriete intellectuelle
+Droit: Droit des societes
 RH: Recrutement
 RH: Formation professionnelle
-RH: Évaluation des performances
+RH: Evaluation des performances
 RH: GPEC
-RH: Mobilité interne
-RH: Rémunération
-RH: Bien-être au travail
-RH: Diversité et inclusion
-RH: Télétravail
+RH: Mobilite interne
+RH: Remuneration
+RH: Bien-etre au travail
+RH: Diversite et inclusion
+RH: Teletravail
 RH: Gestion des talents`;
       updateStats();
+      log('📋 Exemple chargé (sans accents pour éviter les problèmes)', 'info');
     }
 
     function clearTerms() {
       document.getElementById('termsInput').value = '';
+      document.getElementById('debugInfo').classList.add('hidden');
       updateStats();
     }
 
@@ -577,7 +648,8 @@ RH: Gestion des talents`;
       
       const terms = parseTerms();
       if (terms.length === 0) {
-        log('❌ Aucun terme valide trouvé', 'error');
+        log('❌ Aucun terme valide trouvé. Vérifie le format : MATIERE: terme', 'error');
+        log('💡 Essaie le bouton "Exemple" pour voir le format attendu', 'warn');
         return;
       }
       
