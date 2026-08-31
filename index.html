@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur de Définitions STMG</title>
+  <title>Générateur de Définitions STMG (Groq API)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -14,346 +14,69 @@
       padding: 20px;
     }
     .container { max-width: 900px; margin: 0 auto; }
-    h1 {
-      text-align: center;
-      color: #60a5fa;
-      margin-bottom: 8px;
-      font-size: 1.8rem;
-    }
-    .subtitle {
-      text-align: center;
-      color: #94a3b8;
-      margin-bottom: 24px;
-      font-size: 0.95rem;
-    }
-    .card {
-      background: #1e293b;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      border: 1px solid #334155;
-    }
-    .card h2 {
-      color: #60a5fa;
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #cbd5e1;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
+    h1 { text-align: center; color: #60a5fa; margin-bottom: 8px; font-size: 1.8rem; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem; }
+    .card { background: #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #334155; }
+    .card h2 { color: #60a5fa; font-size: 1.1rem; margin-bottom: 12px; }
+    label { display: block; margin-bottom: 6px; color: #cbd5e1; font-size: 0.9rem; font-weight: 500; }
     input, select, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #e2e8f0;
-      font-size: 0.95rem;
-      transition: border-color 0.2s;
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #475569;
+      background: #0f172a; color: #e2e8f0; font-size: 0.95rem; transition: border-color 0.2s;
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #60a5fa;
-    }
-    textarea {
-      min-height: 200px;
-      resize: vertical;
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #60a5fa; }
+    textarea { min-height: 180px; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.5; }
     .btn {
-      padding: 12px 24px;
-      border-radius: 10px;
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      padding: 12px 20px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-primary {
-      background: #3b82f6;
-      color: white;
-    }
-    .btn-primary:hover:not(:disabled) { background: #2563eb; }
-    .btn-success {
-      background: #10b981;
-      color: white;
-    }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-success { background: #10b981; color: white; }
     .btn-success:hover { background: #059669; }
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .stat-box {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #60a5fa;
-    }
-    .stat-label {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #334155;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: #3b82f6;
-      border-radius: 4px;
-      transition: width 0.3s;
-    }
-    .log {
-      background: #0f172a;
-      border-radius: 10px;
-      padding: 12px;
-      max-height: 300px;
-      overflow-y: auto;
-      font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      line-height: 1.6;
-      border: 1px solid #334155;
-    }
-    .log-entry {
-      padding: 4px 0;
-      border-bottom: 1px solid #1e293b;
-    }
+    .btn-danger { background: #ef4444; color: white; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat-box { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; color: #60a5fa; }
+    .stat-label { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
+    .log { background: #0f172a; border-radius: 10px; padding: 12px; max-height: 250px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; border: 1px solid #334155; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #1e293b; }
     .log-success { color: #34d399; }
     .log-error { color: #f87171; }
     .log-info { color: #60a5fa; }
-    .log-warn { color: #fbbf24; }
-    .log-debug { color: #a78bfa; }
-    .definition-card {
-      background: #0f172a;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 10px;
-      border-left: 4px solid;
-    }
-    .definition-card.Management { border-left-color: #8b5cf6; }
-    .definition-card.Économie { border-left-color: #10b981; }
-    .definition-card.Droit { border-left-color: #f59e0b; }
-    .definition-card.RH { border-left-color: #ec4899; }
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    .badge.Management { background: #8b5cf620; color: #a78bfa; }
-    .badge.Économie { background: #10b98120; color: #34d399; }
-    .badge.Droit { background: #f59e0b20; color: #fbbf24; }
-    .badge.RH { background: #ec489920; color: #f472b6; }
-    .term-title {
-      font-weight: 700;
-      font-size: 1rem;
-      margin: 6px 0;
-    }
-    .term-def {
-      color: #cbd5e1;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    .term-example, .term-remember {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-top: 6px;
-      font-style: italic;
-    }
+    .definition-card { background: #0f172a; border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background: #3b82f620; color: #60a5fa; }
+    .term-title { font-weight: 700; font-size: 1rem; margin: 6px 0; }
+    .term-def { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
+    .term-sub { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; font-style: italic; }
     .hidden { display: none !important; }
-    .token-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-    }
-    .token-bar {
-      flex: 1;
-      height: 6px;
-      background: #334155;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .token-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.3s, background 0.3s;
-    }
-    .provider-select {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .provider-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 2px solid #334155;
-      background: #0f172a;
-      color: #94a3b8;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .provider-btn.active {
-      border-color: #3b82f6;
-      color: #60a5fa;
-      background: #3b82f610;
-    }
-    .copy-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #334155;
-      border: none;
-      color: #e2e8f0;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
     .relative { position: relative; }
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #e2e8f0;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #10b981;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 600;
-      opacity: 0;
-      transition: all 0.3s;
-      z-index: 1000;
-    }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-    .model-note {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
-    .debug-info {
-      background: #0f172a;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 8px;
-      font-size: 0.75rem;
-      color: #a78bfa;
-      font-family: monospace;
-    }
+    .copy-btn { position: absolute; top: 12px; right: 12px; background: #334155; border: none; color: #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📚 Générateur de Définitions STMG</h1>
-    <p class="subtitle">Génère en masse des définitions pour ton site jsonbin</p>
+    <p class="subtitle">Génération en masse via l'API Groq</p>
 
     <!-- STATS -->
-    <div class="stats" id="stats">
-      <div class="stat-box">
-        <div class="stat-value" id="stat-total">0</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value" id="stat-done">0</div>
-        <div class="stat-label">Générés</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value" id="stat-remaining">0</div>
-        <div class="stat-label">Restants</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value" id="stat-tokens">—</div>
-        <div class="stat-label">Tokens restants</div>
-      </div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Générés</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-remaining">0</div><div class="stat-label">Restants</div></div>
     </div>
 
     <!-- CONFIGURATION -->
     <div class="card">
-      <h2>🔑 Configuration API</h2>
-      
-      <div class="provider-select">
-        <button class="provider-btn active" onclick="setProvider('groq')">Groq (Recommandé)</button>
-        <button class="provider-btn" onclick="setProvider('openrouter')">OpenRouter</button>
-      </div>
-
-      <label>Clé API</label>
-      <input type="password" id="apiKey" placeholder="gsk_... ou sk-or-..." onchange="saveKey()">
+      <h2>🔑 Configuration Groq</h2>
+      <label>Clé API Groq</label>
+      <input type="password" id="apiKey" placeholder="gsk_..." onchange="saveKey()">
       
       <div style="margin-top:12px;">
         <label>Modèle</label>
         <select id="model">
-          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Groq - rapide)</option>
-          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq - très rapide)</option>
-          <option value="gemma2-9b-it">Gemma 2 9B (Groq)</option>
-          <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Free (OpenRouter)</option>
-          <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B Free (OpenRouter)</option>
+          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommandé - Recommandé pour la qualité)</option>
+          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Très rapide)</option>
         </select>
-        <div class="model-note" id="modelNote">✅ Modèle actif et disponible sur Groq</div>
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="token-info">
-          <span>Usage tokens :</span>
-          <div class="token-bar"><div class="token-fill" id="tokenBar" style="width:0%;background:#10b981;"></div></div>
-          <span id="tokenText">Inconnu</span>
-        </div>
       </div>
     </div>
 
@@ -361,15 +84,9 @@
     <div class="card">
       <h2>📝 Liste des termes</h2>
       <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:12px;">
-        Format : <code>MATIERE: terme</code> (une par ligne). Matières : Management, Économie, Droit, RH
+        Format : <code>MATIERE: terme</code> (une ligne par entrée)
       </p>
-      <textarea id="termsInput" placeholder="Économie: Prix d'equilibre
-Economie: Inflation
-Management: Organigramme
-Droit: Contrat de travail
-RH: Recrutement"></textarea>
-      
-      <div class="debug-info hidden" id="debugInfo"></div>
+      <textarea id="termsInput" placeholder="Économie: Prix d'équilibre&#10;Management: Organigramme&#10;Droit: Contrat de travail&#10;RH: Recrutement"></textarea>
       
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="loadExample()">📋 Exemple</button>
@@ -381,7 +98,7 @@ RH: Recrutement"></textarea>
 
     <!-- LOGS -->
     <div class="card">
-      <h2>📋 Logs</h2>
+      <h2>📋 Console de Suivi</h2>
       <div class="log" id="log"></div>
     </div>
 
@@ -391,85 +108,31 @@ RH: Recrutement"></textarea>
       <div id="resultsList"></div>
       
       <div class="relative" style="margin-top:16px;">
-        <label>JSON final (prêt pour jsonbin)</label>
+        <label>JSON final (Prêt à être copier/collé)</label>
         <textarea id="jsonOutput" readonly style="min-height:150px;"></textarea>
         <button class="copy-btn" onclick="copyJSON()">📋 Copier</button>
-      </div>
-      
-      <div style="margin-top:12px;display:flex;gap:8px;">
-        <button class="btn btn-success" onclick="downloadJSON()">💾 Télécharger JSON</button>
-        <button class="btn btn-primary" onclick="copyJSON()">📋 Copier JSON</button>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">Copié !</div>
-
   <script>
-    // ─── CONFIG ───
-    const PROVIDERS = {
-      groq: {
-        url: 'https://api.groq.com/openai/v1/chat/completions',
-        models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']
-      },
-      openrouter: {
-        url: 'https://openrouter.ai/api/v1/chat/completions',
-        models: ['meta-llama/llama-3.3-70b-instruct:free', 'meta-llama/llama-3.1-8b-instruct:free']
-      }
-    };
-
-    // Mapping des matières (tolérant aux variations)
-    const MATIERE_ALIASES = {
-      'economie': 'Économie',
-      'économie': 'Économie',
-      'eco': 'Économie',
-      'management': 'Management',
-      'mgmt': 'Management',
-      'droit': 'Droit',
-      'rh': 'RH',
-      'ressources humaines': 'RH',
-      'ressources_humaines': 'RH'
-    };
-
-    const MATIERES_VALIDES = new Set(['Management', 'Économie', 'Droit', 'RH']);
-
-    let currentProvider = 'groq';
+    const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    
     let definitions = [];
     let isRunning = false;
     let shouldStop = false;
-    let totalTokensUsed = 0;
-    let totalTokensLimit = 1000000;
 
-    // ─── INIT ───
     window.onload = () => {
-      const saved = localStorage.getItem('stmg_api_key');
-      if (saved) document.getElementById('apiKey').value = saved;
+      const savedKey = localStorage.getItem('groq_api_key');
+      if (savedKey) document.getElementById('apiKey').value = savedKey;
       
       const savedTerms = localStorage.getItem('stmg_terms');
       if (savedTerms) document.getElementById('termsInput').value = savedTerms;
+      updateStats();
     };
 
-    function setProvider(p) {
-      currentProvider = p;
-      document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-      
-      const select = document.getElementById('model');
-      select.innerHTML = '';
-      PROVIDERS[p].models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m.includes('free') ? m + ' (Gratuit)' : m;
-        select.appendChild(opt);
-      });
-      
-      document.getElementById('modelNote').textContent = p === 'groq' 
-        ? '✅ Modèles actifs et disponibles sur Groq' 
-        : '✅ Modèles gratuits disponibles sur OpenRouter';
-    }
-
     function saveKey() {
-      localStorage.setItem('stmg_api_key', document.getElementById('apiKey').value);
+      localStorage.setItem('groq_api_key', document.getElementById('apiKey').value.trim());
     }
 
     function log(msg, type = 'info') {
@@ -482,368 +145,185 @@ RH: Recrutement"></textarea>
       logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function updateStats() {
-      const input = document.getElementById('termsInput').value;
-      const lines = input.split('\n').filter(l => l.trim() && l.includes(':'));
-      const total = lines.length;
-      const done = definitions.length;
-      const remaining = Math.max(0, total - done);
-      
-      document.getElementById('stat-total').textContent = total;
-      document.getElementById('stat-done').textContent = done;
-      document.getElementById('stat-remaining').textContent = remaining;
-      
-      const pct = total > 0 ? (done / total * 100) : 0;
-      document.querySelector('.progress-fill').style.width = pct + '%';
-    }
-
-    function updateTokenDisplay(used, limit) {
-      totalTokensUsed = used;
-      totalTokensLimit = limit || 1000000;
-      const remaining = Math.max(0, limit - used);
-      const pct = (used / limit * 100);
-      
-      document.getElementById('stat-tokens').textContent = (remaining / 1000).toFixed(0) + 'k';
-      document.getElementById('tokenText').textContent = `${(used/1000).toFixed(0)}k / ${(limit/1000).toFixed(0)}k`;
-      document.getElementById('tokenBar').style.width = Math.min(pct, 100) + '%';
-      document.getElementById('tokenBar').style.background = pct > 80 ? '#ef4444' : pct > 50 ? '#f59e0b' : '#10b981';
-    }
-
-    // ─── PARSER ULTRA-TOLÉRANT ───
-    function normalizeString(str) {
-      return str
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlève accents
-        .replace(/[''′`]/g, "'") // Normalise apostrophes
-        .replace(/[–—−]/g, '-') // Normalise tirets
-        .trim()
-        .toLowerCase();
-    }
-
     function parseTerms() {
       const input = document.getElementById('termsInput').value;
       localStorage.setItem('stmg_terms', input);
       
+      const lines = input.split('\n');
       const terms = [];
-      const seen = new Set();
-      const debugLines = [];
       
-      const rawLines = input.split('\n');
-      
-      rawLines.forEach((line, idx) => {
+      lines.forEach(line => {
         const trimmed = line.trim();
         if (!trimmed) return;
         
-        debugLines.push(`Ligne ${idx+1}: "${trimmed}"`);
-        
-        // Cherche le premier ":" ou "-" séparateur
-        let separatorIndex = trimmed.indexOf(':');
-        if (separatorIndex === -1) separatorIndex = trimmed.indexOf('-');
-        if (separatorIndex === -1) separatorIndex = trimmed.indexOf(' ');
-        
-        if (separatorIndex <= 0) {
-          debugLines.push(`  → Pas de séparateur trouvé, ignoré`);
-          return;
+        const sepIndex = trimmed.indexOf(':');
+        if (sepIndex > 0) {
+          const matiere = trimmed.substring(0, sepIndex).trim();
+          const terme = trimmed.substring(sepIndex + 1).trim();
+          if (matiere && terme) {
+            terms.push({ matiere, terme });
+          }
         }
-        
-        const rawMatiere = trimmed.substring(0, separatorIndex).trim();
-        const rawTerme = trimmed.substring(separatorIndex + 1).trim();
-        
-        // Normalise la matière
-        const normalizedMatiere = normalizeString(rawMatiere);
-        const matiere = MATIERE_ALIASES[normalizedMatiere] || 
-                       (MATIERES_VALIDES.has(rawMatiere) ? rawMatiere : null);
-        
-        debugLines.push(`  → Matière brute: "${rawMatiere}" | Normalisée: "${normalizedMatiere}" | Mappée: ${matiere || 'NON TROUVÉE'}`);
-        debugLines.push(`  → Terme: "${rawTerme}"`);
-        
-        if (!matiere) {
-          debugLines.push(`  → ❌ Matière non reconnue`);
-          return;
-        }
-        if (!rawTerme) {
-          debugLines.push(`  → ❌ Terme vide`);
-          return;
-        }
-        
-        const key = `${matiere}:${rawTerme.toLowerCase()}`;
-        if (seen.has(key)) {
-          debugLines.push(`  → ⏭️ Doublon ignoré`);
-          return;
-        }
-        seen.add(key);
-        terms.push({ matiere, terme: rawTerme });
-        debugLines.push(`  → ✅ AJOUTÉ`);
       });
-      
-      // Affiche debug
-      const debugEl = document.getElementById('debugInfo');
-      debugEl.textContent = debugLines.join('\n');
-      debugEl.classList.remove('hidden');
-      
-      log(`📊 Parser: ${terms.length} termes valides trouvés sur ${rawLines.length} lignes`, 'info');
-      
       return terms;
     }
 
+    function updateStats() {
+      const terms = parseTerms();
+      document.getElementById('stat-total').textContent = terms.length;
+      document.getElementById('stat-done').textContent = definitions.length;
+      document.getElementById('stat-remaining').textContent = Math.max(0, terms.length - definitions.length);
+    }
+
     function loadExample() {
-      document.getElementById('termsInput').value = `Economie: Prix d'equilibre
-Economie: Inflation
-Economie: PIB
-Economie: Chomage structurel
-Economie: Croissance economique
-Economie: Politique budgetaire
-Economie: Politique monetaire
-Economie: Fiscalite
-Economie: Commerce international
-Economie: Externalite
-Management: Organigramme
-Management: Culture d'entreprise
-Management: Gestion de projet
-Management: Tableau de bord
-Management: Processus
-Management: Innovation
-Management: Strategie d'entreprise
-Management: Marketing mix
-Management: Benchmarking
-Management: Delegation
-Droit: Contrat de travail
-Droit: Licenciement pour motif economique
-Droit: Duree legale du travail
-Droit: Salaire minimum
-Droit: Securite sociale
-Droit: Representant du personnel
-Droit: Droit de greve
-Droit: Responsabilite civile
-Droit: Propriete intellectuelle
-Droit: Droit des societes
-RH: Recrutement
-RH: Formation professionnelle
-RH: Evaluation des performances
-RH: GPEC
-RH: Mobilite interne
-RH: Remuneration
-RH: Bien-etre au travail
-RH: Diversite et inclusion
-RH: Teletravail
-RH: Gestion des talents`;
+      document.getElementById('termsInput').value = `Économie: Prix d'équilibre\nÉconomie: Inflation\nManagement: Organigramme\nDroit: Contrat de travail\nRH: Recrutement`;
       updateStats();
-      log('📋 Exemple chargé (sans accents pour éviter les problèmes)', 'info');
     }
 
     function clearTerms() {
       document.getElementById('termsInput').value = '';
-      document.getElementById('debugInfo').classList.add('hidden');
+      definitions = [];
+      document.getElementById('resultsList').innerHTML = '';
+      document.getElementById('jsonOutput').value = '';
+      document.getElementById('resultsCard').classList.add('hidden');
       updateStats();
     }
 
-    // ─── GENERATION ───
     async function startGeneration() {
       if (isRunning) return;
       
       const apiKey = document.getElementById('apiKey').value.trim();
       if (!apiKey) {
-        log('❌ Clé API manquante !', 'error');
+        log('❌ Clé API Groq manquante !', 'error');
         return;
       }
       
       const terms = parseTerms();
       if (terms.length === 0) {
-        log('❌ Aucun terme valide trouvé. Vérifie le format : MATIERE: terme', 'error');
-        log('💡 Essaie le bouton "Exemple" pour voir le format attendu', 'warn');
+        log('❌ Aucun terme au format "Matière: Terme" trouvé.', 'error');
         return;
       }
-      
-      const existingTerms = new Set(definitions.map(d => `${d.matiere}:${d.term.toLowerCase()}`));
-      const toGenerate = terms.filter(t => !existingTerms.has(`${t.matiere}:${t.terme.toLowerCase()}`));
-      
-      if (toGenerate.length === 0) {
-        log('✅ Tous les termes sont déjà générés !', 'success');
-        showResults();
-        return;
-      }
-      
+
       isRunning = true;
       shouldStop = false;
-      log(`🚀 Démarrage : ${toGenerate.length} termes à générer...`);
-      
-      for (let i = 0; i < toGenerate.length; i++) {
+      log(`🚀 Début du traitement de ${terms.length} terme(s)...`, 'info');
+
+      for (let i = 0; i < terms.length; i++) {
         if (shouldStop) {
-          log('⏹️ Génération arrêtée par l\'utilisateur', 'warn');
+          log('⏹️ Génération interrompue.', 'error');
           break;
         }
+
+        const { matiere, terme } = terms[i];
         
-        const { terme, matiere } = toGenerate[i];
-        log(`[${i+1}/${toGenerate.length}] Génération : "${terme}" (${matiere})...`);
-        
+        // Vérifie si déjà généré
+        if (definitions.some(d => d.term.toLowerCase() === terme.toLowerCase())) {
+          continue;
+        }
+
+        log(`[${i+1}/${terms.length}] Traitement : "${terme}" (${matiere})...`);
+
         try {
-          const result = await generateOne(terme, matiere, apiKey);
-          if (result) {
-            definitions.push(result);
-            log(`✅ "${terme}" généré !`, 'success');
-            addResultCard(result);
-          } else {
-            log(`❌ Échec pour "${terme}"`, 'error');
+          const res = await fetchDefinitionFromGroq(terme, matiere, apiKey);
+          if (res) {
+            definitions.push(res);
+            addResultCard(res);
+            updateJSON();
+            log(`✅ Généré : "${terme}"`, 'success');
           }
         } catch (err) {
-          log(`❌ Erreur pour "${terme}" : ${err.message}`, 'error');
+          log(`❌ Erreur sur "${terme}": ${err.message}`, 'error');
           if (err.message.includes('429')) {
-            log('⏳ Rate limit atteint, attente 10s...', 'warn');
-            await sleep(10000);
-            i--;
-            continue;
-          }
-          if (err.message.includes('401')) {
-            log('🔑 Clé API invalide ! Vérifie ta clé.', 'error');
-            break;
-          }
-          if (err.message.includes('model') && err.message.includes('decommissioned')) {
-            log('⚠️ Ce modèle n\'existe plus. Change de modèle dans la liste.', 'error');
-            break;
+            log('⏳ Rate limit dépassé. Pause de 5 secondes...', 'error');
+            await sleep(5000);
+            i--; // Recommence le même terme
           }
         }
-        
+
         updateStats();
-        updateJSON();
-        
-        if (currentProvider === 'groq') await sleep(1500);
-        else await sleep(1000);
+        await sleep(1000); // Pause anti-spam API
       }
-      
+
       isRunning = false;
       log('🏁 Génération terminée !', 'success');
-      showResults();
     }
 
     function stopGeneration() {
       shouldStop = true;
-      log('⏹️ Arrêt demandé...', 'warn');
     }
 
-    async function generateOne(terme, matiere, apiKey) {
+    async function fetchDefinitionFromGroq(terme, matiere, apiKey) {
       const model = document.getElementById('model').value;
-      const url = PROVIDERS[currentProvider].url;
-      
-      const systemPrompt = `Tu es un assistant pédagogique spécialisé en STMG.
-Génère une définition au format JSON STRICT avec ces règles :
-- "term" : le terme exact fourni
-- "matiere" : EXACTEMENT "${matiere}" (pas de variation)
-- "def" : définition claire, concise, adaptée à un élève de STMG (2-3 phrases max)
-- "example" : un exemple concret et réaliste (1 phrase), ou "" si vraiment impossible
-- "remember" : une astuce mnémotechnique ou phrase clé pour retenir, ou "" si pas pertinent
-- Pas de champ "id"
-- Réponds UNIQUEMENT avec le JSON brut, sans markdown, sans explication.`;
 
-      const response = await fetch(url, {
+      const systemPrompt = `Tu es un réducteur de contenu pédagogique spécialisé pour la filière STMG.
+Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact :
+{
+  "term": "nom du terme",
+  "matiere": "nom de la matiere",
+  "def": "Définition courte et claire (2-3 phrases max)",
+  "example": "Exemple concret (1 phrase) ou chaîne vide si inutile",
+  "remember": "Moyen mnémotechnique ou idée-clé"
+}`;
+
+      const userPrompt = `Génère la fiche pour le terme "${terme}" en matière "${matiere}".`;
+
+      const response = await fetch(GROQ_URL, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          ...(currentProvider === 'openrouter' ? { 'HTTP-Referer': window.location.href } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model,
+          model: model,
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Définis le terme "${terme}" pour la matière ${matiere}.` }
+            { role: 'user', content: userPrompt }
           ],
-          temperature: 0.3,
-          max_tokens: 500
+          response_format: { type: "json_object" },
+          temperature: 0.2
         })
       });
-      
+
       if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`${response.status}: ${errText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
-      if (data.usage) {
-        updateTokenDisplay(
-          totalTokensUsed + (data.usage.total_tokens || 0),
-          1000000
-        );
-      }
-      
-      let content = data.choices[0].message.content.trim();
-      content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      
-      let parsed;
-      try {
-        parsed = JSON.parse(content);
-      } catch (e) {
-        const match = content.match(/\{[\s\S]*\}/);
-        if (match) parsed = JSON.parse(match[0]);
-        else throw new Error('JSON invalide');
-      }
-      
-      if (!MATIERES_VALIDES.has(parsed.matiere)) {
-        parsed.matiere = matiere;
-      }
-      parsed.term = parsed.term || terme;
-      parsed.def = parsed.def || '';
-      parsed.example = parsed.example || '';
-      parsed.remember = parsed.remember || '';
-      
-      return parsed;
+      const content = data.choices[0].message.content;
+      return JSON.parse(content);
     }
 
-    function sleep(ms) {
-      return new Promise(r => setTimeout(r, ms));
-    }
-
-    // ─── AFFICHAGE RÉSULTATS ───
     function addResultCard(def) {
+      document.getElementById('resultsCard').classList.remove('hidden');
       const list = document.getElementById('resultsList');
       const card = document.createElement('div');
-      card.className = `definition-card ${def.matiere}`;
+      card.className = 'definition-card';
       card.innerHTML = `
-        <span class="badge ${def.matiere}">${def.matiere}</span>
+        <span class="badge">${def.matiere}</span>
         <div class="term-title">${def.term}</div>
         <div class="term-def">${def.def}</div>
-        ${def.example ? `<div class="term-example">💡 ${def.example}</div>` : ''}
-        ${def.remember ? `<div class="term-remember">🧠 ${def.remember}</div>` : ''}
+        ${def.example ? `<div class="term-sub">💡 Exemple : ${def.example}</div>` : ''}
+        ${def.remember ? `<div class="term-sub">🧠 Astuce : ${def.remember}</div>` : ''}
       `;
-      list.insertBefore(card, list.firstChild);
-    }
-
-    function showResults() {
-      document.getElementById('resultsCard').classList.remove('hidden');
-      document.getElementById('resultsCount').textContent = definitions.length;
-      updateJSON();
+      list.prepend(card);
     }
 
     function updateJSON() {
       const json = JSON.stringify(definitions, null, 2);
       document.getElementById('jsonOutput').value = json;
+      document.getElementById('resultsCount').textContent = definitions.length;
     }
 
     function copyJSON() {
       const json = document.getElementById('jsonOutput').value;
-      navigator.clipboard.writeText(json).then(() => showToast('JSON copié !'));
+      navigator.clipboard.writeText(json);
+      alert('JSON copié dans le presse-papier !');
     }
 
-    function downloadJSON() {
-      const json = document.getElementById('jsonOutput').value;
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `definitions_stmg_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('JSON téléchargé !');
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-
-    document.getElementById('termsInput').addEventListener('input', updateStats);
-    updateStats();
   </script>
 </body>
 </html>
