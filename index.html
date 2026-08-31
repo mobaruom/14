@@ -1,914 +1,767 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Yasser & Bouthaina — Le mariage</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Parisienne&family=Playfair+Display:ital,wght@0,500;0,600;1,600&display=swap" rel="stylesheet">
-
-<style>
-
-:root {
-  --ivory: #f8f4ec;
-  --cream: #eee5d6;
-  --champagne: #d8c39a;
-  --gold: #b9985b;
-  --gold-light: #ead9ad;
-  --sage: #a7ad99;
-  --olive: #6e765d;
-  --forest: #394234;
-  --brown: #4a4036;
-  --dark: #26251f;
-  --white: #fffdf8;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: 'EB Garamond', serif;
-  color: var(--white);
-  background:
-    linear-gradient(
-      180deg,
-      #b8b9a8 0%,
-      #8e9881 20%,
-      #68745f 42%,
-      #4c5948 65%,
-      #30372c 100%
-    );
-  overflow-x: hidden;
-}
-
-.display {
-  font-family: 'Cormorant Garamond', serif;
-}
-
-.script {
-  font-family: 'Parisienne', cursive;
-}
-
-/* =========================
-   GENERAL
-========================= */
-
-.scene {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 90px 22px;
-  text-align: center;
-  overflow: hidden;
-}
-
-.content {
-  position: relative;
-  z-index: 5;
-  width: 100%;
-  max-width: 680px;
-}
-
-.eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--gold-light);
-  margin-bottom: 25px;
-}
-
-.reveal {
-  opacity: 0;
-  transform: translateY(35px);
-  transition: all 1.1s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* =========================
-   HERO
-========================= */
-
-#hero {
-  min-height: 100svh;
-  background:
-    linear-gradient(
-      rgba(38, 37, 31, 0.28),
-      rgba(38, 37, 31, 0.58)
-    ),
-    url("https://i.postimg.cc/ZqJ82Qv5/60C53ED0-BB84-47E9-B4D0-8BF4E5D2099A.png") center / cover;
-}
-
-#hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      circle at center,
-      transparent 20%,
-      rgba(38, 37, 31, 0.4) 100%
-    );
-  pointer-events: none;
-}
-
-.hero-content {
-  animation: heroAppear 1.6s ease forwards;
-}
-
-@keyframes heroAppear {
-  from {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-label {
-  letter-spacing: 0.4em;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  color: var(--gold-light);
-  margin-bottom: 30px;
-}
-
-.names {
-  font-size: clamp(3.1rem, 12vw, 5.8rem);
-  font-weight: 400;
-  line-height: 0.9;
-  text-shadow: 0 5px 25px rgba(0,0,0,0.35);
-}
-
-.names span {
-  font-family: 'Parisienne', cursive;
-  color: var(--gold-light);
-  font-size: 0.55em;
-  display: block;
-  margin: 15px 0;
-}
-
-.hero-subtitle {
-  font-size: 1.1rem;
-  margin-top: 28px;
-  color: var(--white);
-  letter-spacing: 0.06em;
-}
-
-.hero-date {
-  margin-top: 15px;
-  font-size: 1.4rem;
-  color: var(--gold-light);
-}
-
-.hero-location {
-  font-size: 0.95rem;
-  margin-top: 5px;
-  opacity: 0.9;
-}
-
-/* =========================
-   BUTTON
-========================= */
-
-.cta {
-  display: inline-block;
-  margin-top: 35px;
-  padding: 15px 30px;
-  border: 1px solid var(--gold-light);
-  color: var(--white);
-  text-decoration: none;
-  letter-spacing: 0.2em;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  background: rgba(255,255,255,0.05);
-  transition: all 0.4s ease;
-  cursor: pointer;
-}
-
-.cta:hover {
-  background: var(--gold-light);
-  color: var(--dark);
-}
-
-/* =========================
-   COUNTDOWN
-========================= */
-
-.countdown {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-top: 38px;
-  flex-wrap: wrap; 
-}
-
-.countdown-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.countdown-number {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.2rem;
-  color: var(--white);
-}
-
-.countdown-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold-light);
-}
-
-/* =========================
-   SECTIONS
-========================= */
-
-#story {
-  background:
-    linear-gradient(
-      rgba(58, 66, 52, 0.88),
-      rgba(58, 66, 52, 0.96)
-    );
-}
-
-#message {
-  background:
-    linear-gradient(
-      rgba(42, 47, 38, 0.93),
-      rgba(42, 47, 38, 0.98)
-    );
-}
-
-#details {
-  background:
-    linear-gradient(
-      rgba(53, 62, 48, 0.95),
-      rgba(37, 42, 34, 1)
-    );
-}
-
-/* =========================
-   PHOTO
-========================= */
-
-.photo-frame {
-  width: min(90vw, 520px);
-  margin: 0 auto 40px;
-  position: relative;
-  padding: 10px;
-  border: 1px solid var(--gold);
-  background: rgba(255,255,255,0.05);
-}
-
-.photo-frame::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid rgba(234,217,173,0.45);
-  pointer-events: none;
-}
-
-.photo-frame img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: center;
-  filter:
-    saturate(0.85)
-    contrast(1.05)
-    brightness(0.96);
-}
-
-.section-title {
-  font-size: clamp(2rem, 8vw, 3.5rem);
-  font-weight: 400;
-  margin-bottom: 25px;
-}
-
-.section-text {
-  max-width: 500px;
-  margin: auto;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.88);
-}
-
-/* =========================
-   DECORATION
-========================= */
-
-.decor {
-  width: 130px;
-  height: 1px;
-  background: var(--gold);
-  margin: 28px auto;
-  position: relative;
-}
-
-.decor::after {
-  content: "✦";
-  position: absolute;
-  left: 50%;
-  top: -12px;
-  transform: translateX(-50%);
-  color: var(--gold-light);
-  background: var(--forest);
-  padding: 0 12px;
-  font-size: 17px;
-}
-
-/* =========================
-   CARD
-========================= */
-
-.card {
-  max-width: 550px;
-  margin: auto;
-  padding: 45px 30px;
-  border: 1px solid var(--gold);
-  position: relative;
-  background: rgba(255,255,255,0.035);
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(234,217,173,0.4);
-  pointer-events: none;
-}
-
-.card-title {
-  font-size: 2rem;
-  color: var(--gold-light);
-  margin-bottom: 22px;
-}
-
-.card-text {
-  font-size: 1.15rem;
-  line-height: 1.8;
-}
-
-/* =========================
-   DETAILS
-========================= */
-
-.details-list {
-  max-width: 430px;
-  margin: 35px auto;
-}
-
-.detail {
-  padding: 25px 0;
-  border-top: 1px solid rgba(234,217,173,0.45);
-}
-
-.detail:last-child {
-  border-bottom: 1px solid rgba(234,217,173,0.45);
-}
-
-.detail-label {
-  display: block;
-  color: var(--gold-light);
-  font-size: 0.65rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.detail-value {
-  font-size: 1.3rem;
-  font-family: 'Cormorant Garamond', serif;
-}
-
-/* =========================
-   FOOTER
-========================= */
-
-footer {
-  min-height: 65vh !important;
-  background: #252a22;
-}
-
-.signature {
-  font-size: 3rem;
-  color: var(--gold-light);
-}
-
-.footer-date {
-  margin-top: 20px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.65);
-}
-
-/* =========================
-   FLOATING PARTICLES
-========================= */
-
-.particle {
-  position: fixed;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--gold-light);
-  box-shadow: 0 0 12px var(--gold-light);
-  pointer-events: none;
-  opacity: 0;
-  animation: floatParticle 10s infinite ease-in-out;
-  z-index: 1;
-}
-
-@keyframes floatParticle {
-
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  25% {
-    opacity: 0.7;
-  }
-
-  75% {
-    opacity: 0.5;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-120px);
-  }
-
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 500px) {
-
-  .scene {
-    padding: 75px 20px;
-  }
-
-  .countdown {
-    gap: 17px;
-  }
-
-  .countdown-number {
-    font-size: 1.65rem;
-  }
-
-  .names {
-    font-size: 3.5rem;
-  }
-
-  .photo-frame {
-    width: 92vw;
-  }
-
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de Définitions STMG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 {
+      text-align: center;
+      color: #60a5fa;
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
+    }
+    .card h2 {
+      color: #60a5fa;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #60a5fa;
+    }
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    .btn-success:hover { background: #059669; }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #334155;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .log {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      border: 1px solid #334155;
+    }
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #1e293b;
+    }
+    .log-success { color: #34d399; }
+    .log-error { color: #f87171; }
+    .log-info { color: #60a5fa; }
+    .log-warn { color: #fbbf24; }
+    .definition-card {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+    }
+    .definition-card.Management { border-left-color: #8b5cf6; }
+    .definition-card.Économie { border-left-color: #10b981; }
+    .definition-card.Droit { border-left-color: #f59e0b; }
+    .definition-card.RH { border-left-color: #ec4899; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge.Management { background: #8b5cf620; color: #a78bfa; }
+    .badge.Économie { background: #10b98120; color: #34d399; }
+    .badge.Droit { background: #f59e0b20; color: #fbbf24; }
+    .badge.RH { background: #ec489920; color: #f472b6; }
+    .term-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 6px 0;
+    }
+    .term-def {
+      color: #cbd5e1;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .term-example, .term-remember {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    .hidden { display: none !important; }
+    .token-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .token-bar {
+      flex: 1;
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .token-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s, background 0.3s;
+    }
+    .provider-select {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .provider-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #334155;
+      background: #0f172a;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .provider-btn.active {
+      border-color: #3b82f6;
+      color: #60a5fa;
+      background: #3b82f610;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #334155;
+      border: none;
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .relative { position: relative; }
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>📚 Générateur de Définitions STMG</h1>
+    <p class="subtitle">Génère en masse des définitions pour ton site jsonbin</p>
 
-<!-- PARTICULES -->
-<div id="particles"></div>
-
-<!-- =========================
-     HERO
-========================= -->
-
-<section class="scene" id="hero">
-
-  <div class="content hero-content">
-
-    <div class="hero-label">
-      Une nouvelle histoire commence
+    <!-- STATS -->
+    <div class="stats" id="stats">
+      <div class="stat-box">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-done">0</div>
+        <div class="stat-label">Générés</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-remaining">0</div>
+        <div class="stat-label">Restants</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-tokens">—</div>
+        <div class="stat-label">Tokens restants</div>
+      </div>
     </div>
 
-    <h1 class="names display">
-      Yasser
-      <span>&</span>
-      Bouthaina
-    </h1>
-
-    <p class="hero-subtitle">
-      Vous invitent à célébrer leur mariage
-    </p>
-
-    <p class="hero-date display">
-      Vendredi 14 Août 2026
-    </p>
-
-    <p class="hero-location">
-      Salle des fêtes Kenza
-    </p>
-
-    <!-- COMPTE À REBOURS -->
-
-    <div class="countdown">
-
-      <div class="countdown-item">
-        <span class="countdown-number" id="days">00</span>
-        <span class="countdown-label">Jours</span>
-      </div>
-
-      <div class="countdown-item">
-        <span class="countdown-number" id="hours">00</span>
-        <span class="countdown-label">Heures</span>
-      </div>
-
-      <div class="countdown-item">
-        <span class="countdown-number" id="minutes">00</span>
-        <span class="countdown-label">Minutes</span>
-      </div>
-
-      <div class="countdown-item">
-        <span class="countdown-number" id="seconds">00</span>
-        <span class="countdown-label">Secondes</span>
-      </div>
-
-    </div>
-
-    <a href="#story" class="cta">
-      Découvrir notre histoire
-    </a>
-
-  </div>
-
-</section>
-
-
-<!-- =========================
-     PHOTO / STORY
-========================= -->
-
-<section class="scene" id="story">
-
-  <div class="content reveal">
-
-    <p class="eyebrow">
-      Deux cœurs, un même chemin
-    </p>
-
-    <div class="photo-frame">
-
-      <img
-        src="https://i.postimg.cc/ZqJ82Qv5/60C53ED0-BB84-47E9-B4D0-8BF4E5D2099A.png"
-        alt="Yasser et Bouthaina"
-      >
-
-    </div>
-
-    <h2 class="section-title display">
-      Le début d'une nouvelle histoire
-    </h2>
-
-    <div class="decor"></div>
-
-    <p class="section-text">
-      Après le « oui », une nouvelle aventure commence.
-      Nous sommes heureux de pouvoir partager cette journée
-      si particulière avec les personnes qui comptent le plus pour nous.
-    </p>
-
-  </div>
-
-</section>
-
-
-<!-- =========================
-     MESSAGE
-========================= -->
-
-<section class="scene" id="message">
-
-  <div class="content reveal">
-
+    <!-- CONFIGURATION -->
     <div class="card">
+      <h2>🔑 Configuration API</h2>
+      
+      <div class="provider-select">
+        <button class="provider-btn active" onclick="setProvider('groq')">Groq (Recommandé)</button>
+        <button class="provider-btn" onclick="setProvider('openrouter')">OpenRouter</button>
+      </div>
 
-      <h2 class="card-title script">
-        Chers amis et famille,
-      </h2>
+      <label>Clé API</label>
+      <input type="password" id="apiKey" placeholder="gsk_... ou sk-or-..." onchange="saveKey()">
+      
+      <div style="margin-top:12px;">
+        <label>Modèle</label>
+        <select id="model">
+          <option value="llama-3.1-70b-versatile">Llama 3.1 70B (Groq)</option>
+          <option value="mixtral-8x7b-32768">Mixtral 8x7B (Groq)</option>
+          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq - rapide)</option>
+          <option value="meta-llama/llama-3.1-70b-instruct:free">Llama 3.1 70B Free (OpenRouter)</option>
+          <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B Free (OpenRouter)</option>
+        </select>
+      </div>
 
-      <p class="card-text">
-        Nous avons le bonheur de vous inviter à célébrer notre mariage
-        et à partager avec nous l'un des plus beaux jours de notre vie.
-        Votre présence sera pour nous le plus précieux des cadeaux.
+      <div style="margin-top:12px;">
+        <div class="token-info">
+          <span>Usage tokens :</span>
+          <div class="token-bar"><div class="token-fill" id="tokenBar" style="width:0%;background:#10b981;"></div></div>
+          <span id="tokenText">Inconnu</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTE DES TERMES -->
+    <div class="card">
+      <h2>📝 Liste des termes</h2>
+      <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:12px;">
+        Format : <code>MATIERE: terme</code> (une par ligne). Matières : Management, Économie, Droit, RH
       </p>
-
+      <textarea id="termsInput" placeholder="Économie: Prix d'équilibre
+Économie: Inflation
+Management: Organigramme
+Droit: Contrat de travail
+RH: Recrutement"></textarea>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="loadExample()">📋 Exemple</button>
+        <button class="btn btn-primary" onclick="clearTerms()">🗑️ Vider</button>
+        <button class="btn btn-success" onclick="startGeneration()">🚀 Lancer la génération</button>
+        <button class="btn btn-danger" onclick="stopGeneration()">⏹️ Arrêter</button>
+      </div>
     </div>
 
-  </div>
-
-</section>
-
-
-<!-- =========================
-     DETAILS
-========================= -->
-
-<section class="scene" id="details">
-
-  <div class="content reveal">
-
-    <p class="eyebrow">
-      Vous êtes invités
-    </p>
-
-    <h2 class="section-title display">
-      Informations pratiques
-    </h2>
-
-    <div class="details-list">
-
-      <div class="detail">
-
-        <span class="detail-label">
-          Date
-        </span>
-
-        <span class="detail-value">
-          Vendredi 14 Août 2026
-        </span>
-
-      </div>
-
-
-      <div class="detail">
-
-        <span class="detail-label">
-          Heure
-        </span>
-
-        <span class="detail-value">
-          À partir de 21h00
-        </span>
-
-      </div>
-
-
-      <div class="detail">
-
-        <span class="detail-label">
-          Lieu
-        </span>
-
-        <span class="detail-value">
-          Salle des fêtes Kenza
-        </span>
-
-      </div>
-
+    <!-- LOGS -->
+    <div class="card">
+      <h2>📋 Logs</h2>
+      <div class="log" id="log"></div>
     </div>
 
-
-    <button class="cta" id="mapBtn">
-      Voir l'itinéraire
-    </button>
-
-    <br>
-
-    <button class="cta" id="calendarBtn">
-      Ajouter au calendrier
-    </button>
-
+    <!-- RÉSULTATS -->
+    <div class="card hidden" id="resultsCard">
+      <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
+      <div id="resultsList"></div>
+      
+      <div class="relative" style="margin-top:16px;">
+        <label>JSON final (prêt pour jsonbin)</label>
+        <textarea id="jsonOutput" readonly style="min-height:150px;"></textarea>
+        <button class="copy-btn" onclick="copyJSON()">📋 Copier</button>
+      </div>
+      
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn btn-success" onclick="downloadJSON()">💾 Télécharger JSON</button>
+        <button class="btn btn-primary" onclick="copyJSON()">📋 Copier JSON</button>
+      </div>
+    </div>
   </div>
 
-</section>
+  <div class="toast" id="toast">Copié !</div>
 
-
-<!-- =========================
-     FOOTER
-========================= -->
-
-<footer class="scene">
-
-  <div class="content reveal">
-
-    <p class="eyebrow">
-      Avec tout notre amour
-    </p>
-
-    <p class="signature script">
-      Yasser & Bouthaina
-    </p>
-
-    <p class="footer-date">
-      14 Août 2026 · Salle des fêtes Kenza
-    </p>
-
-  </div>
-
-</footer>
-
-
-<script>
-
-/* =========================
-   COMPTE À REBOURS (21h00)
-========================= */
-
-const weddingDate =
-  new Date("2026-08-14T21:00:00+01:00").getTime();
-
-function updateCountdown() {
-
-  const now = new Date().getTime();
-
-  let difference = weddingDate - now;
-
-  if (difference < 0) {
-    difference = 0;
-  }
-
-  const days = Math.floor(
-    difference / (1000 * 60 * 60 * 24)
-  );
-
-  const hours = Math.floor(
-    (difference % (1000 * 60 * 60 * 24))
-    / (1000 * 60 * 60)
-  );
-
-  const minutes = Math.floor(
-    (difference % (1000 * 60 * 60))
-    / (1000 * 60)
-  );
-
-  const seconds = Math.floor(
-    (difference % (1000 * 60))
-    / 1000
-  );
-
-  document.getElementById("days").textContent =
-    String(days).padStart(2, "0");
-
-  document.getElementById("hours").textContent =
-    String(hours).padStart(2, "0");
-
-  document.getElementById("minutes").textContent =
-    String(minutes).padStart(2, "0");
-
-  document.getElementById("seconds").textContent =
-    String(seconds).padStart(2, "0");
-
-}
-
-updateCountdown();
-
-setInterval(updateCountdown, 1000);
-
-
-/* =========================
-   ANIMATION AU SCROLL
-========================= */
-
-const observer = new IntersectionObserver(
-
-  (entries) => {
-
-    entries.forEach((entry) => {
-
-      if (entry.isIntersecting) {
-
-        entry.target.classList.add("visible");
-
+  <script>
+    // ─── CONFIG ───
+    const PROVIDERS = {
+      groq: {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        models: ['llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'llama-3.1-8b-instant']
+      },
+      openrouter: {
+        url: 'https://openrouter.ai/api/v1/chat/completions',
+        models: ['meta-llama/llama-3.1-70b-instruct:free', 'meta-llama/llama-3.1-8b-instruct:free']
       }
+    };
 
-    });
+    let currentProvider = 'groq';
+    let definitions = [];
+    let isRunning = false;
+    let shouldStop = false;
+    let totalTokensUsed = 0;
+    let totalTokensLimit = 1000000; // Groq ~1M/jour
 
-  },
+    const MATIERES_VALIDES = new Set(['Management', 'Économie', 'Droit', 'RH']);
 
-  {
-    threshold: 0.15
-  }
+    // ─── INIT ───
+    window.onload = () => {
+      const saved = localStorage.getItem('stmg_api_key');
+      if (saved) document.getElementById('apiKey').value = saved;
+      
+      const savedTerms = localStorage.getItem('stmg_terms');
+      if (savedTerms) document.getElementById('termsInput').value = savedTerms;
+    };
 
-);
+    function setProvider(p) {
+      currentProvider = p;
+      document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const select = document.getElementById('model');
+      select.innerHTML = '';
+      PROVIDERS[p].models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m.includes('free') ? m + ' (Gratuit)' : m;
+        select.appendChild(opt);
+      });
+    }
 
-document
-  .querySelectorAll(".reveal")
-  .forEach((element) => {
+    function saveKey() {
+      localStorage.setItem('stmg_api_key', document.getElementById('apiKey').value);
+    }
 
-    observer.observe(element);
+    function log(msg, type = 'info') {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      const time = new Date().toLocaleTimeString('fr-FR');
+      entry.textContent = `[${time}] ${msg}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
 
-  });
+    function updateStats() {
+      const input = document.getElementById('termsInput').value;
+      const lines = input.split('\n').filter(l => l.trim() && l.includes(':'));
+      const total = lines.length;
+      const done = definitions.length;
+      const remaining = Math.max(0, total - done);
+      
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-done').textContent = done;
+      document.getElementById('stat-remaining').textContent = remaining;
+      
+      const pct = total > 0 ? (done / total * 100) : 0;
+      document.querySelector('.progress-fill').style.width = pct + '%';
+    }
 
+    function updateTokenDisplay(used, limit) {
+      totalTokensUsed = used;
+      totalTokensLimit = limit || 1000000;
+      const remaining = Math.max(0, limit - used);
+      const pct = (used / limit * 100);
+      
+      document.getElementById('stat-tokens').textContent = (remaining / 1000).toFixed(0) + 'k';
+      document.getElementById('tokenText').textContent = `${(used/1000).toFixed(0)}k / ${(limit/1000).toFixed(0)}k`;
+      document.getElementById('tokenBar').style.width = Math.min(pct, 100) + '%';
+      document.getElementById('tokenBar').style.background = pct > 80 ? '#ef4444' : pct > 50 ? '#f59e0b' : '#10b981';
+    }
 
-/* =========================
-   PARTICULES LUMINEUSES
-========================= */
+    function parseTerms() {
+      const input = document.getElementById('termsInput').value;
+      localStorage.setItem('stmg_terms', input);
+      
+      const terms = [];
+      const seen = new Set();
+      
+      input.split('\n').forEach(line => {
+        line = line.trim();
+        if (!line || !line.includes(':')) return;
+        
+        const [matiere, ...termParts] = line.split(':');
+        const matiereTrim = matiere.trim();
+        const terme = termParts.join(':').trim();
+        
+        if (!MATIERES_VALIDES.has(matiereTrim)) {
+          log(`⚠️ Matière ignorée "${matiereTrim}" pour "${terme}"`, 'warn');
+          return;
+        }
+        if (!terme) return;
+        
+        const key = `${matiereTrim}:${terme.toLowerCase()}`;
+        if (seen.has(key)) {
+          log(`⏭️ Doublon ignoré : "${terme}" (${matiereTrim})`, 'warn');
+          return;
+        }
+        seen.add(key);
+        terms.push({ matiere: matiereTrim, terme });
+      });
+      
+      return terms;
+    }
 
-const particlesContainer =
-  document.getElementById("particles");
+    function loadExample() {
+      document.getElementById('termsInput').value = `Économie: Prix d'équilibre
+Économie: Inflation
+Économie: PIB
+Économie: Chômage structurel
+Économie: Croissance économique
+Économie: Politique budgétaire
+Économie: Politique monétaire
+Économie: Fiscalité
+Économie: Commerce international
+Économie: Externalité
+Management: Organigramme
+Management: Culture d'entreprise
+Management: Gestion de projet
+Management: Tableau de bord
+Management: Processus
+Management: Innovation
+Management: Stratégie d'entreprise
+Management: Marketing mix
+Management: Benchmarking
+Management: Délégation
+Droit: Contrat de travail
+Droit: Licenciement pour motif économique
+Droit: Durée légale du travail
+Droit: Salaire minimum
+Droit: Sécurité sociale
+Droit: Représentant du personnel
+Droit: Droit de grève
+Droit: Responsabilité civile
+Droit: Propriété intellectuelle
+Droit: Droit des sociétés
+RH: Recrutement
+RH: Formation professionnelle
+RH: Évaluation des performances
+RH: GPEC
+RH: Mobilité interne
+RH: Rémunération
+RH: Bien-être au travail
+RH: Diversité et inclusion
+RH: Télétravail
+RH: Gestion des talents`;
+      updateStats();
+    }
 
-for (let i = 0; i < 18; i++) {
+    function clearTerms() {
+      document.getElementById('termsInput').value = '';
+      updateStats();
+    }
 
-  const particle =
-    document.createElement("div");
+    // ─── GENERATION ───
+    async function startGeneration() {
+      if (isRunning) return;
+      
+      const apiKey = document.getElementById('apiKey').value.trim();
+      if (!apiKey) {
+        log('❌ Clé API manquante !', 'error');
+        return;
+      }
+      
+      const terms = parseTerms();
+      if (terms.length === 0) {
+        log('❌ Aucun terme valide trouvé', 'error');
+        return;
+      }
+      
+      // Filtrer les déjà générés
+      const existingTerms = new Set(definitions.map(d => `${d.matiere}:${d.term.toLowerCase()}`));
+      const toGenerate = terms.filter(t => !existingTerms.has(`${t.matiere}:${t.terme.toLowerCase()}`));
+      
+      if (toGenerate.length === 0) {
+        log('✅ Tous les termes sont déjà générés !', 'success');
+        showResults();
+        return;
+      }
+      
+      isRunning = true;
+      shouldStop = false;
+      log(`🚀 Démarrage : ${toGenerate.length} termes à générer...`);
+      
+      for (let i = 0; i < toGenerate.length; i++) {
+        if (shouldStop) {
+          log('⏹️ Génération arrêtée par l\'utilisateur', 'warn');
+          break;
+        }
+        
+        const { terme, matiere } = toGenerate[i];
+        log(`[${i+1}/${toGenerate.length}] Génération : "${terme}" (${matiere})...`);
+        
+        try {
+          const result = await generateOne(terme, matiere, apiKey);
+          if (result) {
+            definitions.push(result);
+            log(`✅ "${terme}" généré !`, 'success');
+            addResultCard(result);
+          } else {
+            log(`❌ Échec pour "${terme}"`, 'error');
+          }
+        } catch (err) {
+          log(`❌ Erreur réseau pour "${terme}" : ${err.message}`, 'error');
+          if (err.message.includes('429')) {
+            log('⏳ Rate limit atteint, attente 10s...', 'warn');
+            await sleep(10000);
+            i--; // Réessayer
+            continue;
+          }
+        }
+        
+        updateStats();
+        updateJSON();
+        
+        // Rate limiting
+        if (currentProvider === 'groq') await sleep(2000);
+        else await sleep(1000);
+      }
+      
+      isRunning = false;
+      log('🏁 Génération terminée !', 'success');
+      showResults();
+    }
 
-  particle.className = "particle";
+    function stopGeneration() {
+      shouldStop = true;
+      log('⏹️ Arrêt demandé...', 'warn');
+    }
 
-  particle.style.left =
-    Math.random() * 100 + "%";
+    async function generateOne(terme, matiere, apiKey) {
+      const model = document.getElementById('model').value;
+      const url = PROVIDERS[currentProvider].url;
+      
+      const systemPrompt = `Tu es un assistant pédagogique spécialisé en STMG.
+Génère une définition au format JSON STRICT avec ces règles :
+- "term" : le terme exact fourni
+- "matiere" : EXACTEMENT "${matiere}" (pas de variation)
+- "def" : définition claire, concise, adaptée à un élève de STMG (2-3 phrases max)
+- "example" : un exemple concret et réaliste (1 phrase), ou "" si vraiment impossible
+- "remember" : une astuce mnémotechnique ou phrase clé pour retenir, ou "" si pas pertinent
+- Pas de champ "id"
+- Réponds UNIQUEMENT avec le JSON brut, sans markdown, sans explication.`;
 
-  particle.style.top =
-    40 + Math.random() * 60 + "%";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          ...(currentProvider === 'openrouter' ? { 'HTTP-Referer': window.location.href } : {})
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Définis le terme "${terme}" pour la matière ${matiere}.` }
+          ],
+          temperature: 0.3,
+          max_tokens: 500
+        })
+      });
+      
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`${response.status}: ${err}`);
+      }
+      
+      const data = await response.json();
+      
+      // Mise à jour des tokens
+      if (data.usage) {
+        updateTokenDisplay(
+          totalTokensUsed + (data.usage.total_tokens || 0),
+          data.usage.total_tokens ? 1000000 : totalTokensLimit
+        );
+      }
+      
+      let content = data.choices[0].message.content.trim();
+      
+      // Nettoyage markdown
+      content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch (e) {
+        // Tentative d'extraction JSON
+        const match = content.match(/\{[\s\S]*\}/);
+        if (match) parsed = JSON.parse(match[0]);
+        else throw new Error('JSON invalide');
+      }
+      
+      // Validation
+      if (!MATIERES_VALIDES.has(parsed.matiere)) {
+        parsed.matiere = matiere;
+      }
+      parsed.term = parsed.term || terme;
+      parsed.def = parsed.def || '';
+      parsed.example = parsed.example || '';
+      parsed.remember = parsed.remember || '';
+      
+      return parsed;
+    }
 
-  particle.style.animationDelay =
-    Math.random() * 10 + "s";
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
 
-  particle.style.animationDuration =
-    7 + Math.random() * 6 + "s";
+    // ─── AFFICHAGE RÉSULTATS ───
+    function addResultCard(def) {
+      const list = document.getElementById('resultsList');
+      const card = document.createElement('div');
+      card.className = `definition-card ${def.matiere}`;
+      card.innerHTML = `
+        <span class="badge ${def.matiere}">${def.matiere}</span>
+        <div class="term-title">${def.term}</div>
+        <div class="term-def">${def.def}</div>
+        ${def.example ? `<div class="term-example">💡 ${def.example}</div>` : ''}
+        ${def.remember ? `<div class="term-remember">🧠 ${def.remember}</div>` : ''}
+      `;
+      list.insertBefore(card, list.firstChild);
+    }
 
-  particlesContainer.appendChild(particle);
+    function showResults() {
+      document.getElementById('resultsCard').classList.remove('hidden');
+      document.getElementById('resultsCount').textContent = definitions.length;
+      updateJSON();
+    }
 
-}
+    function updateJSON() {
+      const json = JSON.stringify(definitions, null, 2);
+      document.getElementById('jsonOutput').value = json;
+    }
 
+    function copyJSON() {
+      const json = document.getElementById('jsonOutput').value;
+      navigator.clipboard.writeText(json).then(() => showToast('JSON copié !'));
+    }
 
-/* =========================
-   ITINÉRAIRE (RECHERCHE ANDROID / GOOGLE MAPS)
-========================= */
+    function downloadJSON() {
+      const json = document.getElementById('jsonOutput').value;
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `definitions_stmg_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('JSON téléchargé !');
+    }
 
-document
-  .getElementById("mapBtn")
-  .addEventListener("click", function() {
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
 
-    // On utilise directement la recherche Google Maps pour éviter les erreurs de pays
-    const url = "https://www.google.com/maps/search/?api=1&query=Salle+des+fêtes+Kenza+Oran";
-
-    window.open(url, "_blank");
-
-  });
-
-
-/* =========================
-   AJOUTER AU CALENDRIER (21h00)
-========================= */
-
-document
-  .getElementById("calendarBtn")
-  .addEventListener("click", function() {
-
-    const start =
-      "20260814T200000Z"; // 21h00 en Algérie (UTC+1) = 20h00 UTC
-
-    const end =
-      "20260815T020000Z"; // Fin à 03h00 du matin
-
-    const title =
-      encodeURIComponent(
-        "Mariage de Yasser & Bouthaina"
-      );
-
-    const location =
-      encodeURIComponent(
-        "Salle des fêtes Kenza, Oran, Algérie"
-      );
-
-    const details =
-      encodeURIComponent(
-        "Célébration du mariage de Yasser et Bouthaina"
-      );
-
-    const calendarUrl =
-      "https://calendar.google.com/calendar/render?action=TEMPLATE"
-      + "&text=" + title
-      + "&dates=" + start + "/" + end
-      + "&location=" + location
-      + "&details=" + details;
-
-    window.open(calendarUrl, "_blank");
-
-  });
-
-</script>
-
+    // Mettre à jour les stats quand on tape
+    document.getElementById('termsInput').addEventListener('input', updateStats);
+    updateStats();
+  </script>
 </body>
 </html>
