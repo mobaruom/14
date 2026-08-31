@@ -282,6 +282,11 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
+    .model-note {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -324,12 +329,13 @@
       <div style="margin-top:12px;">
         <label>Modèle</label>
         <select id="model">
-          <option value="llama-3.1-70b-versatile">Llama 3.1 70B (Groq)</option>
-          <option value="mixtral-8x7b-32768">Mixtral 8x7B (Groq)</option>
-          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq - rapide)</option>
-          <option value="meta-llama/llama-3.1-70b-instruct:free">Llama 3.1 70B Free (OpenRouter)</option>
+          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Groq - rapide)</option>
+          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq - très rapide)</option>
+          <option value="gemma2-9b-it">Gemma 2 9B (Groq)</option>
+          <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Free (OpenRouter)</option>
           <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B Free (OpenRouter)</option>
         </select>
+        <div class="model-note" id="modelNote">✅ Modèle actif et disponible sur Groq</div>
       </div>
 
       <div style="margin-top:12px;">
@@ -391,11 +397,11 @@ RH: Recrutement"></textarea>
     const PROVIDERS = {
       groq: {
         url: 'https://api.groq.com/openai/v1/chat/completions',
-        models: ['llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'llama-3.1-8b-instant']
+        models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']
       },
       openrouter: {
         url: 'https://openrouter.ai/api/v1/chat/completions',
-        models: ['meta-llama/llama-3.1-70b-instruct:free', 'meta-llama/llama-3.1-8b-instruct:free']
+        models: ['meta-llama/llama-3.3-70b-instruct:free', 'meta-llama/llama-3.1-8b-instruct:free']
       }
     };
 
@@ -404,7 +410,7 @@ RH: Recrutement"></textarea>
     let isRunning = false;
     let shouldStop = false;
     let totalTokensUsed = 0;
-    let totalTokensLimit = 1000000; // Groq ~1M/jour
+    let totalTokensLimit = 1000000;
 
     const MATIERES_VALIDES = new Set(['Management', 'Économie', 'Droit', 'RH']);
 
@@ -430,6 +436,10 @@ RH: Recrutement"></textarea>
         opt.textContent = m.includes('free') ? m + ' (Gratuit)' : m;
         select.appendChild(opt);
       });
+      
+      document.getElementById('modelNote').textContent = p === 'groq' 
+        ? '✅ Modèles actifs et disponibles sur Groq (août 2026)' 
+        : '✅ Modèles gratuits disponibles sur OpenRouter';
     }
 
     function saveKey() {
@@ -571,7 +581,6 @@ RH: Gestion des talents`;
         return;
       }
       
-      // Filtrer les déjà générés
       const existingTerms = new Set(definitions.map(d => `${d.matiere}:${d.term.toLowerCase()}`));
       const toGenerate = terms.filter(t => !existingTerms.has(`${t.matiere}:${t.terme.toLowerCase()}`));
       
@@ -604,20 +613,27 @@ RH: Gestion des talents`;
             log(`❌ Échec pour "${terme}"`, 'error');
           }
         } catch (err) {
-          log(`❌ Erreur réseau pour "${terme}" : ${err.message}`, 'error');
+          log(`❌ Erreur pour "${terme}" : ${err.message}`, 'error');
           if (err.message.includes('429')) {
             log('⏳ Rate limit atteint, attente 10s...', 'warn');
             await sleep(10000);
-            i--; // Réessayer
+            i--;
             continue;
+          }
+          if (err.message.includes('401')) {
+            log('🔑 Clé API invalide ! Vérifie ta clé.', 'error');
+            break;
+          }
+          if (err.message.includes('model') && err.message.includes('decommissioned')) {
+            log('⚠️ Ce modèle n\'existe plus. Change de modèle dans la liste.', 'error');
+            break;
           }
         }
         
         updateStats();
         updateJSON();
         
-        // Rate limiting
-        if (currentProvider === 'groq') await sleep(2000);
+        if (currentProvider === 'groq') await sleep(1500);
         else await sleep(1000);
       }
       
@@ -664,36 +680,31 @@ Génère une définition au format JSON STRICT avec ces règles :
       });
       
       if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`${response.status}: ${err}`);
+        const errText = await response.text();
+        throw new Error(`${response.status}: ${errText}`);
       }
       
       const data = await response.json();
       
-      // Mise à jour des tokens
       if (data.usage) {
         updateTokenDisplay(
           totalTokensUsed + (data.usage.total_tokens || 0),
-          data.usage.total_tokens ? 1000000 : totalTokensLimit
+          1000000
         );
       }
       
       let content = data.choices[0].message.content.trim();
-      
-      // Nettoyage markdown
       content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       
       let parsed;
       try {
         parsed = JSON.parse(content);
       } catch (e) {
-        // Tentative d'extraction JSON
         const match = content.match(/\{[\s\S]*\}/);
         if (match) parsed = JSON.parse(match[0]);
         else throw new Error('JSON invalide');
       }
       
-      // Validation
       if (!MATIERES_VALIDES.has(parsed.matiere)) {
         parsed.matiere = matiere;
       }
@@ -759,7 +770,6 @@ Génère une définition au format JSON STRICT avec ces règles :
       setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    // Mettre à jour les stats quand on tape
     document.getElementById('termsInput').addEventListener('input', updateStats);
     updateStats();
   </script>
