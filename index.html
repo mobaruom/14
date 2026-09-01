@@ -24,7 +24,7 @@
       background: #0f172a; color: #e2e8f0; font-size: 0.95rem; transition: border-color 0.2s;
     }
     input:focus, textarea:focus { outline: none; border-color: #60a5fa; }
-    textarea { min-height: 160px; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.5; }
+    textarea { min-height: 120px; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.5; }
     .btn {
       padding: 14px 24px; border-radius: 10px; border: none; font-size: 1rem; font-weight: 700;
       cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
@@ -37,7 +37,7 @@
     .btn-success:hover:not(:disabled) { background: #059669; }
     .btn-danger { background: #ef4444; color: white; }
     .btn-danger:hover:not(:disabled) { background: #dc2626; }
-    .btn-secondary { background: #334155; color: #e2e8f0; width: auto; }
+    .btn-secondary { background: #334155; color: #e2e8f0; width: auto; padding: 10px 18px; font-size: 0.9rem; }
     .btn-secondary:hover:not(:disabled) { background: #475569; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-box { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
@@ -60,6 +60,8 @@
     .pulse { animation: pulse 1.5s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
     .banner { background: #0c4a3a; border: 1px solid #10b981; color: #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
+    details { margin-top: 4px; }
+    summary { cursor: pointer; color: #60a5fa; font-size: 0.85rem; padding: 4px 0; }
   </style>
 </head>
 <body>
@@ -68,7 +70,7 @@
     <p class="subtitle">L'IA invente et génère les termes toute seule, en continu</p>
 
     <div class="stats">
-      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées (cette session)</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-status">⏸️</div><div class="stat-label">État</div></div>
     </div>
 
@@ -79,11 +81,22 @@
     </div>
 
     <div class="card">
+      <details>
+        <summary>📂 Importer un JSON déjà généré (pour éviter les doublons entre deux sessions)</summary>
+        <div style="margin-top:10px;">
+          <textarea id="importInput" placeholder='Colle ici le JSON exporté précédemment, ex: [{"term":"...","matiere":"...","def":"...","example":"...","remember":"..."}, ...]'></textarea>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="importJSON()">📥 Importer cette liste</button>
+          <div class="status-line" id="importStatus"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-success" id="btnStart" onclick="startGeneration()">🚀 Démarrer</button>
         <button class="btn btn-danger" id="btnStop" onclick="stopGeneration()" disabled>⏹️ Arrêter et récupérer le JSON</button>
       </div>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:10px;">Ça tourne sans s'arrêter tant que tu ne cliques pas sur "Arrêter". Tu peux fermer/rouvrir la page, la génération s'arrête seulement quand tu cliques Arrêter ou que tu quittes la page.</p>
+      <p style="color:#64748b;font-size:0.8rem;margin-top:10px;">Ça tourne sans s'arrêter tant que tu ne cliques pas sur "Arrêter".</p>
     </div>
 
     <div class="card">
@@ -92,7 +105,7 @@
     </div>
 
     <div class="card hidden" id="resultsCard">
-      <div class="banner" id="stoppedBanner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier.</div>
+      <div class="banner" id="stoppedBanner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier (y compris ce que tu avais importé).</div>
       <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
 
       <div class="relative" style="margin-bottom:16px;">
@@ -108,9 +121,17 @@
 
   <script>
     const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-    const MODEL_CHAIN = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
+    // Ordre de préférence : Llama 4 Scout (30 000 TPM en gratuit, largement le plus permissif)
+    // puis repli sur les GPT-OSS (8 000 TPM) si Scout venait à être retiré ou indisponible.
+    const MODEL_CHAIN = [
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+      'openai/gpt-oss-20b',
+      'openai/gpt-oss-120b'
+    ];
+    const MATIERES_VALIDES = ['Management', 'Droit', 'Économie', 'RH'];
 
-    let definitions = [];
+    let definitions = [];       // fiches générées (session + importées), exportées telles quelles
+    let knownTerms = new Set(); // pour dédoublonnage rapide, insensible à la casse
     let isRunning = false;
     let shouldStop = false;
     let storageAvailable = false;
@@ -158,6 +179,36 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
+    function importJSON() {
+      const raw = document.getElementById('importInput').value.trim();
+      const statusEl = document.getElementById('importStatus');
+      if (!raw) { statusEl.textContent = ''; return; }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error('pas un tableau');
+      } catch (e) {
+        statusEl.textContent = '❌ JSON invalide : vérifie le format collé.';
+        statusEl.style.color = '#f87171';
+        return;
+      }
+
+      let added = 0;
+      parsed.forEach(item => {
+        if (item && item.term && !knownTerms.has(item.term.toLowerCase())) {
+          definitions.push(item);
+          knownTerms.add(item.term.toLowerCase());
+          added++;
+        }
+      });
+
+      statusEl.style.color = '#34d399';
+      statusEl.textContent = `✅ ${added} terme(s) importé(s) et pris en compte pour éviter les doublons.`;
+      log(`📥 ${added} terme(s) importé(s) depuis le JSON collé.`, 'success');
+      updateStats();
+    }
+
     function updateStats() {
       document.getElementById('stat-done').textContent = definitions.length;
       const statusEl = document.getElementById('stat-status');
@@ -188,28 +239,32 @@
       setRunningUI(true);
       updateStats();
       document.getElementById('resultsCard').classList.add('hidden');
-      log('🚀 Génération continue démarrée...', 'info');
+      log(`🚀 Génération continue démarrée (${knownTerms.size} terme(s) déjà connus)...`, 'info');
 
       let count = 0;
       while (!shouldStop) {
         count++;
         log(`[${count}] Génération d'un nouveau terme...`);
 
-        let retried = false;
+        let waitMs = 0;
         try {
           const res = await fetchDefinitionWithFallback(apiKey);
-          if (res && !definitions.some(d => d.term.toLowerCase() === res.term.toLowerCase())) {
-            definitions.push(res);
-            log(`✅ "${res.term}" (${res.matiere})`, 'success');
-          } else if (res) {
-            log(`↩️ "${res.term}" déjà généré, on continue.`, 'info');
+          if (res) {
+            const key = res.term.toLowerCase();
+            if (!knownTerms.has(key)) {
+              definitions.push(res);
+              knownTerms.add(key);
+              log(`✅ "${res.term}" (${res.matiere})`, 'success');
+            } else {
+              log(`↩️ "${res.term}" déjà généré, on continue.`, 'info');
+            }
           }
         } catch (err) {
           log(`❌ Erreur : ${err.message}`, 'error');
-          if (err.message.includes('429') && !shouldStop) {
-            log('⏳ Rate limit dépassé. Pause de 5 secondes...', 'error');
-            await sleep(5000);
-            retried = true;
+          if (err.message.startsWith('RATE_LIMIT:') && !shouldStop) {
+            waitMs = parseInt(err.message.split(':')[1], 10) || 5000;
+            log(`⏳ Rate limit dépassé. Pause de ${(waitMs / 1000).toFixed(1)}s...`, 'error');
+            await sleep(waitMs);
           } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key')) {
             log('🛑 Clé API invalide. Arrêt de la génération.', 'error');
             shouldStop = true;
@@ -217,7 +272,7 @@
         }
 
         updateStats();
-        if (!retried && !shouldStop) await sleep(700);
+        if (waitMs === 0 && !shouldStop) await sleep(1500);
       }
 
       isRunning = false;
@@ -257,7 +312,7 @@
       let lastErr;
       for (const model of MODEL_CHAIN) {
         try {
-          return await fetchDefinitionFromGroq(apiKey, model);
+          return await fetchValidDefinition(apiKey, model);
         } catch (err) {
           lastErr = err;
           const msg = err.message.toLowerCase();
@@ -265,26 +320,50 @@
             log(`↪️ Modèle "${model}" indisponible, essai suivant...`, 'info');
             continue;
           }
-          throw err;
+          throw err; // rate limit, 401, réseau -> on remonte direct, pas de fallback de modèle
         }
       }
       throw lastErr;
     }
 
+    // Redemande une fiche tant que la matière renvoyée n'est pas une des 4 valides (max 2 tentatives)
+    async function fetchValidDefinition(apiKey, model) {
+      let lastParsed = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const parsed = await fetchDefinitionFromGroq(apiKey, model);
+        const normalized = normalizeMatiere(parsed.matiere);
+        if (normalized) {
+          parsed.matiere = normalized;
+          return parsed;
+        }
+        lastParsed = parsed;
+        log(`↪️ Matière "${parsed.matiere}" hors liste, nouvelle tentative...`, 'info');
+      }
+      throw new Error(`Matière invalide reçue du modèle : "${lastParsed?.matiere}"`);
+    }
+
+    function normalizeMatiere(m) {
+      if (!m) return null;
+      const clean = m.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // enlève les accents pour comparer
+      const map = { 'management': 'Management', 'droit': 'Droit', 'economie': 'Économie', 'rh': 'RH', 'ressources humaines': 'RH' };
+      return map[clean] || null;
+    }
+
     async function fetchDefinitionFromGroq(apiKey, model) {
-      // On envoie les termes déjà générés (les 40 derniers pour ne pas alourdir le prompt)
-      // pour que le modèle évite les doublons et choisisse un nouveau terme lui-même.
-      const already = definitions.slice(-40).map(d => d.term);
+      // On n'envoie que les 10 derniers termes connus pour limiter la taille du prompt (économie de tokens).
+      const recent = Array.from(knownTerms).slice(-10);
 
-      const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG (lycée français : Management, Droit, Économie, Sciences de gestion et numérique, RH...).
+      const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG (lycée français).
 À chaque appel, choisis TOI-MÊME un terme ou une notion du programme STMG qui n'est PAS dans la liste des termes déjà traités, et génère sa fiche.
-Varie les matières (Management, Droit, Économie, Sciences de gestion et numérique, RH) et le niveau de difficulté au fil des appels.
-Termes déjà traités (à éviter absolument) : ${already.length ? already.join(', ') : 'aucun'}.
+La matière DOIT être EXACTEMENT l'une de ces 4 valeurs, sans variante ni sous-catégorie : "Management", "Droit", "Économie", "RH".
+Varie les matières et le niveau de difficulté au fil des appels.
+Termes déjà traités récemment (à éviter) : ${recent.length ? recent.join(', ') : 'aucun'}.
 
-Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
+Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
 {
   "term": "nom du terme choisi",
-  "matiere": "matière STMG",
+  "matiere": "Management" | "Droit" | "Économie" | "RH",
   "def": "Définition courte et claire (2-3 phrases max)",
   "example": "Exemple concret (1 phrase) ou chaîne vide si inutile",
   "remember": "Moyen mnémotechnique ou idée-clé"
@@ -307,7 +386,8 @@ Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du J
               { role: 'user', content: userPrompt }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.9
+            temperature: 0.9,
+            max_completion_tokens: 400
           })
         });
       } catch (networkErr) {
@@ -316,10 +396,18 @@ Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du J
 
       if (!response.ok) {
         let errMsg = `HTTP ${response.status}`;
+        let bodyText = '';
         try {
           const errorData = await response.json();
-          if (errorData?.error?.message) errMsg = errorData.error.message + ` (${response.status})`;
+          bodyText = errorData?.error?.message || '';
+          if (bodyText) errMsg = bodyText + ` (${response.status})`;
         } catch (e) { }
+
+        if (response.status === 429) {
+          // On essaie d'extraire "try again in Xs" / "Xms" / "Xm Ys" renvoyé par Groq pour attendre pile ce qu'il faut.
+          const waitMs = parseRetryAfter(bodyText) ?? 5000;
+          throw new Error(`RATE_LIMIT:${waitMs}:${errMsg}`);
+        }
         throw new Error(errMsg);
       }
 
@@ -331,8 +419,20 @@ Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du J
       try { parsed = JSON.parse(content); }
       catch (e) { throw new Error("Le modèle n'a pas renvoyé un JSON valide."); }
 
-      if (!parsed.term || !parsed.def) throw new Error('JSON incomplet renvoyé par le modèle.');
+      if (!parsed.term || !parsed.def || !parsed.matiere) throw new Error('JSON incomplet renvoyé par le modèle.');
       return parsed;
+    }
+
+    function parseRetryAfter(text) {
+      if (!text) return null;
+      // Formats vus chez Groq : "try again in 22.5ms", "try again in 6m 11.52s", "try again in 3.2s"
+      const mMatch = text.match(/(\d+)m\s*([\d.]+)s/);
+      if (mMatch) return (parseInt(mMatch[1], 10) * 60 + parseFloat(mMatch[2])) * 1000;
+      const sMatch = text.match(/([\d.]+)s\b/);
+      if (sMatch) return parseFloat(sMatch[1]) * 1000;
+      const msMatch = text.match(/([\d.]+)ms\b/);
+      if (msMatch) return parseFloat(msMatch[1]);
+      return null;
     }
 
     function escapeHTML(str) {
