@@ -126,13 +126,15 @@
 
   <script>
     // --- Fournisseurs ---
-    // Groq : Llama 4 Scout en priorité (30 000 TPM en gratuit), repli sur les GPT-OSS (8 000 TPM).
+    // Groq : Llama 4 Scout en priorité (30 000 TPM en gratuit), repli sur Llama 4 Maverick.
+    // Les GPT-OSS ont été retirés : ce sont des modèles "à raisonnement" qui consomment une partie
+    // du budget de tokens de sortie en réflexion cachée, ce qui coupait le JSON en cours de génération.
     // Gemini : utilisé via sa couche de compatibilité OpenAI, en parallèle de Groq si une clé est fournie.
     const PROVIDERS = {
       groq: {
         label: 'Groq',
         url: 'https://api.groq.com/openai/v1/chat/completions',
-        models: ['meta-llama/llama-4-scout-17b-16e-instruct', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+        models: ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'],
         useMaxTokensField: 'max_completion_tokens'
       },
       gemini: {
