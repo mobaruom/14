@@ -129,7 +129,9 @@
     // Groq : Llama 4 Scout en priorité (30 000 TPM en gratuit), repli sur Llama 4 Maverick.
     // Les GPT-OSS ont été retirés : ce sont des modèles "à raisonnement" qui consomment une partie
     // du budget de tokens de sortie en réflexion cachée, ce qui coupait le JSON en cours de génération.
-    // Gemini : utilisé via sa couche de compatibilité OpenAI, en parallèle de Groq si une clé est fournie.
+    // Gemini : gemini-2.0-flash a été retiré par Google le 1er juin 2026 (d'où l'erreur 404 vue en test).
+    // On utilise désormais gemini-3.6-flash (modèle courant, tier gratuit) avec repli sur 3.5 Flash-Lite,
+    // via la couche de compatibilité OpenAI de Google, en parallèle de Groq si une clé est fournie.
     const PROVIDERS = {
       groq: {
         label: 'Groq',
@@ -140,7 +142,7 @@
       gemini: {
         label: 'Gemini',
         url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-        models: ['gemini-2.5-flash', 'gemini-2.0-flash'],
+        models: ['gemini-3.6-flash', 'gemini-3.5-flash-lite'],
         useMaxTokensField: 'max_tokens'
       }
     };
@@ -424,15 +426,18 @@ Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
 
       if (!response.ok) {
         let errMsg = `HTTP ${response.status}`;
-        let bodyText = '';
+        let rawErrorText = '';
         try {
           const errorData = await response.json();
-          bodyText = errorData?.error?.message || JSON.stringify(errorData?.error || errorData);
-          if (bodyText) errMsg = bodyText + ` (${response.status})`;
+          // On garde le JSON complet (rawErrorText) pour repérer un éventuel "retryDelay" imbriqué
+          // (c'est là que Gemini le place, pas dans .error.message), et le message lisible pour l'affichage.
+          rawErrorText = JSON.stringify(errorData);
+          const readableMsg = errorData?.error?.message;
+          if (readableMsg) errMsg = readableMsg + ` (${response.status})`;
         } catch (e) { }
 
         if (response.status === 429) {
-          const waitMs = parseRetryAfter(bodyText) ?? 8000;
+          const waitMs = parseRetryAfter(rawErrorText) ?? 8000;
           throw new Error(`RATE_LIMIT:${waitMs}:${errMsg}`);
         }
         throw new Error(errMsg);
