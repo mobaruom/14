@@ -29,11 +29,13 @@
       padding: 12px 20px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: 600;
       cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
     }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
     .btn-success { background: #10b981; color: white; }
-    .btn-success:hover { background: #059669; }
+    .btn-success:hover:not(:disabled) { background: #059669; }
     .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover:not(:disabled) { background: #dc2626; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-box { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
     .stat-value { font-size: 1.6rem; font-weight: 700; color: #60a5fa; }
@@ -51,6 +53,8 @@
     .hidden { display: none !important; }
     .relative { position: relative; }
     .copy-btn { position: absolute; top: 12px; right: 12px; background: #334155; border: none; color: #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    .warn { background: #451a03; border: 1px solid #92400e; color: #fbbf24; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; margin-top: 10px; }
+    .status-line { font-size: 0.8rem; color: #94a3b8; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -70,14 +74,15 @@
       <h2>🔑 Configuration Groq</h2>
       <label>Clé API Groq</label>
       <input type="password" id="apiKey" placeholder="gsk_..." onchange="saveKey()">
-      
+
       <div style="margin-top:12px;">
         <label>Modèle</label>
         <select id="model">
-          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommandé - Recommandé pour la qualité)</option>
+          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommandé pour la qualité)</option>
           <option value="llama-3.1-8b-instant">Llama 3.1 8B (Très rapide)</option>
         </select>
       </div>
+      <div class="status-line" id="storageStatus"></div>
     </div>
 
     <!-- LISTE DES TERMES -->
@@ -86,13 +91,13 @@
       <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:12px;">
         Format : <code>MATIERE: terme</code> (une ligne par entrée)
       </p>
-      <textarea id="termsInput" placeholder="Économie: Prix d'équilibre&#10;Management: Organigramme&#10;Droit: Contrat de travail&#10;RH: Recrutement"></textarea>
-      
+      <textarea id="termsInput" placeholder="Économie: Prix d'équilibre&#10;Management: Organigramme&#10;Droit: Contrat de travail&#10;RH: Recrutement" oninput="updateStats()"></textarea>
+
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="loadExample()">📋 Exemple</button>
-        <button class="btn btn-primary" onclick="clearTerms()">🗑️ Vider</button>
-        <button class="btn btn-success" onclick="startGeneration()">🚀 Lancer la génération</button>
-        <button class="btn btn-danger" onclick="stopGeneration()">⏹️ Arrêter</button>
+        <button class="btn btn-primary" id="btnExample" onclick="loadExample()">📋 Exemple</button>
+        <button class="btn btn-primary" id="btnClear" onclick="clearTerms()">🗑️ Vider</button>
+        <button class="btn btn-success" id="btnStart" onclick="startGeneration()">🚀 Lancer la génération</button>
+        <button class="btn btn-danger" id="btnStop" onclick="stopGeneration()" disabled>⏹️ Arrêter</button>
       </div>
     </div>
 
@@ -106,9 +111,9 @@
     <div class="card hidden" id="resultsCard">
       <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
       <div id="resultsList"></div>
-      
+
       <div class="relative" style="margin-top:16px;">
-        <label>JSON final (Prêt à être copier/collé)</label>
+        <label>JSON final (Prêt à être copié/collé)</label>
         <textarea id="jsonOutput" readonly style="min-height:150px;"></textarea>
         <button class="copy-btn" onclick="copyJSON()">📋 Copier</button>
       </div>
@@ -117,22 +122,61 @@
 
   <script>
     const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-    
+
     let definitions = [];
     let isRunning = false;
     let shouldStop = false;
+    let storageAvailable = false;
 
-    window.onload = () => {
-      const savedKey = localStorage.getItem('groq_api_key');
-      if (savedKey) document.getElementById('apiKey').value = savedKey;
-      
-      const savedTerms = localStorage.getItem('stmg_terms');
-      if (savedTerms) document.getElementById('termsInput').value = savedTerms;
+    // ---- Stockage persistant (window.storage), avec repli sur mémoire simple ----
+    // ATTENTION : localStorage/sessionStorage ne fonctionnent pas dans cet environnement,
+    // et lèvent une exception qui bloquait tout le script au chargement. On utilise
+    // désormais window.storage (persistant, propre à cet outil) avec un solide try/catch,
+    // et l'app fonctionne même si le stockage échoue (juste sans mémorisation).
+
+    async function initStorage() {
+      const statusEl = document.getElementById('storageStatus');
+      try {
+        if (window.storage && typeof window.storage.get === 'function') {
+          storageAvailable = true;
+
+          const savedKey = await safeGet('groq_api_key');
+          if (savedKey) document.getElementById('apiKey').value = savedKey;
+
+          const savedTerms = await safeGet('stmg_terms');
+          if (savedTerms) document.getElementById('termsInput').value = savedTerms;
+
+          statusEl.textContent = 'Clé et liste de termes mémorisées sur cet appareil.';
+        } else {
+          statusEl.textContent = "Mémorisation indisponible ici : la clé et la liste ne seront pas sauvegardées entre deux sessions.";
+        }
+      } catch (e) {
+        storageAvailable = false;
+        statusEl.textContent = "Mémorisation indisponible ici : la clé et la liste ne seront pas sauvegardées entre deux sessions.";
+      }
       updateStats();
-    };
+    }
+
+    async function safeGet(key) {
+      try {
+        const result = await window.storage.get(key, false);
+        return result ? result.value : null;
+      } catch (e) {
+        return null; // clé absente ou erreur -> pas bloquant
+      }
+    }
+
+    async function safeSet(key, value) {
+      if (!storageAvailable) return;
+      try {
+        await window.storage.set(key, value, false);
+      } catch (e) {
+        // silencieux : la mémorisation est un bonus, pas un pré-requis pour utiliser l'outil
+      }
+    }
 
     function saveKey() {
-      localStorage.setItem('groq_api_key', document.getElementById('apiKey').value.trim());
+      safeSet('groq_api_key', document.getElementById('apiKey').value.trim());
     }
 
     function log(msg, type = 'info') {
@@ -147,15 +191,15 @@
 
     function parseTerms() {
       const input = document.getElementById('termsInput').value;
-      localStorage.setItem('stmg_terms', input);
-      
+      safeSet('stmg_terms', input);
+
       const lines = input.split('\n');
       const terms = [];
-      
+
       lines.forEach(line => {
         const trimmed = line.trim();
         if (!trimmed) return;
-        
+
         const sepIndex = trimmed.indexOf(':');
         if (sepIndex > 0) {
           const matiere = trimmed.substring(0, sepIndex).trim();
@@ -189,15 +233,22 @@
       updateStats();
     }
 
+    function setRunningUI(running) {
+      document.getElementById('btnStart').disabled = running;
+      document.getElementById('btnExample').disabled = running;
+      document.getElementById('btnClear').disabled = running;
+      document.getElementById('btnStop').disabled = !running;
+    }
+
     async function startGeneration() {
       if (isRunning) return;
-      
+
       const apiKey = document.getElementById('apiKey').value.trim();
       if (!apiKey) {
         log('❌ Clé API Groq manquante !', 'error');
         return;
       }
-      
+
       const terms = parseTerms();
       if (terms.length === 0) {
         log('❌ Aucun terme au format "Matière: Terme" trouvé.', 'error');
@@ -206,6 +257,7 @@
 
       isRunning = true;
       shouldStop = false;
+      setRunningUI(true);
       log(`🚀 Début du traitement de ${terms.length} terme(s)...`, 'info');
 
       for (let i = 0; i < terms.length; i++) {
@@ -215,14 +267,15 @@
         }
 
         const { matiere, terme } = terms[i];
-        
+
         // Vérifie si déjà généré
         if (definitions.some(d => d.term.toLowerCase() === terme.toLowerCase())) {
           continue;
         }
 
-        log(`[${i+1}/${terms.length}] Traitement : "${terme}" (${matiere})...`);
+        log(`[${i + 1}/${terms.length}] Traitement : "${terme}" (${matiere})...`);
 
+        let retried = false;
         try {
           const res = await fetchDefinitionFromGroq(terme, matiere, apiKey);
           if (res) {
@@ -233,18 +286,25 @@
           }
         } catch (err) {
           log(`❌ Erreur sur "${terme}": ${err.message}`, 'error');
-          if (err.message.includes('429')) {
+          if (err.message.includes('429') && !shouldStop) {
             log('⏳ Rate limit dépassé. Pause de 5 secondes...', 'error');
             await sleep(5000);
             i--; // Recommence le même terme
+            retried = true;
+          } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key')) {
+            log('🛑 Clé API invalide. Arrêt de la génération.', 'error');
+            shouldStop = true;
           }
         }
 
         updateStats();
-        await sleep(1000); // Pause anti-spam API
+        if (!retried) {
+          await sleep(1000); // Pause anti-spam API
+        }
       }
 
       isRunning = false;
+      setRunningUI(false);
       log('🏁 Génération terminée !', 'success');
     }
 
@@ -255,8 +315,8 @@
     async function fetchDefinitionFromGroq(terme, matiere, apiKey) {
       const model = document.getElementById('model').value;
 
-      const systemPrompt = `Tu es un réducteur de contenu pédagogique spécialisé pour la filière STMG.
-Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact :
+      const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG.
+Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact, sans aucun texte hors du JSON :
 {
   "term": "nom du terme",
   "matiere": "nom de la matiere",
@@ -267,31 +327,58 @@ Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact :
 
       const userPrompt = `Génère la fiche pour le terme "${terme}" en matière "${matiere}".`;
 
-      const response = await fetch(GROQ_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.2
-        })
-      });
+      let response;
+      try {
+        response = await fetch(GROQ_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.2
+          })
+        });
+      } catch (networkErr) {
+        throw new Error(`Réseau : impossible de joindre l'API Groq (${networkErr.message})`);
+      }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        let errMsg = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData?.error?.message) errMsg = errorData.error.message + ` (${response.status})`;
+        } catch (e) { /* corps non-JSON, on garde le code HTTP */ }
+        throw new Error(errMsg);
       }
 
       const data = await response.json();
-      const content = data.choices[0].message.content;
-      return JSON.parse(content);
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Réponse vide ou mal formée de l\'API.');
+
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch (e) {
+        throw new Error('Le modèle n\'a pas renvoyé un JSON valide.');
+      }
+
+      if (!parsed.term || !parsed.def) {
+        throw new Error('JSON incomplet renvoyé par le modèle (champs manquants).');
+      }
+      return parsed;
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str ?? '';
+      return div.innerHTML;
     }
 
     function addResultCard(def) {
@@ -300,11 +387,11 @@ Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact :
       const card = document.createElement('div');
       card.className = 'definition-card';
       card.innerHTML = `
-        <span class="badge">${def.matiere}</span>
-        <div class="term-title">${def.term}</div>
-        <div class="term-def">${def.def}</div>
-        ${def.example ? `<div class="term-sub">💡 Exemple : ${def.example}</div>` : ''}
-        ${def.remember ? `<div class="term-sub">🧠 Astuce : ${def.remember}</div>` : ''}
+        <span class="badge">${escapeHTML(def.matiere)}</span>
+        <div class="term-title">${escapeHTML(def.term)}</div>
+        <div class="term-def">${escapeHTML(def.def)}</div>
+        ${def.example ? `<div class="term-sub">💡 Exemple : ${escapeHTML(def.example)}</div>` : ''}
+        ${def.remember ? `<div class="term-sub">🧠 Astuce : ${escapeHTML(def.remember)}</div>` : ''}
       `;
       list.prepend(card);
     }
@@ -317,13 +404,34 @@ Tu dois répondre STRICTEMENT au format JSON respectant ce schéma exact :
 
     function copyJSON() {
       const json = document.getElementById('jsonOutput').value;
-      navigator.clipboard.writeText(json);
-      alert('JSON copié dans le presse-papier !');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(() => {
+          log('📋 JSON copié dans le presse-papier.', 'success');
+        }).catch(() => {
+          fallbackCopy(json);
+        });
+      } else {
+        fallbackCopy(json);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.getElementById('jsonOutput');
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        log('📋 JSON copié dans le presse-papier.', 'success');
+      } catch (e) {
+        log('❌ Impossible de copier automatiquement. Sélectionnez le texte manuellement.', 'error');
+      }
     }
 
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    initStorage();
   </script>
 </body>
 </html>
