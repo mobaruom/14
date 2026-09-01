@@ -26,8 +26,9 @@
     input:focus, textarea:focus { outline: none; border-color: #60a5fa; }
     textarea { min-height: 160px; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.5; }
     .btn {
-      padding: 12px 20px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: 600;
+      padding: 14px 24px; border-radius: 10px; border: none; font-size: 1rem; font-weight: 700;
       cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+      width: 100%; justify-content: center;
     }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #3b82f6; color: white; }
@@ -36,6 +37,8 @@
     .btn-success:hover:not(:disabled) { background: #059669; }
     .btn-danger { background: #ef4444; color: white; }
     .btn-danger:hover:not(:disabled) { background: #dc2626; }
+    .btn-secondary { background: #334155; color: #e2e8f0; width: auto; }
+    .btn-secondary:hover:not(:disabled) { background: #475569; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-box { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
     .stat-value { font-size: 1.6rem; font-weight: 700; color: #60a5fa; }
@@ -54,17 +57,19 @@
     .relative { position: relative; }
     .copy-btn { position: absolute; top: 12px; right: 12px; background: #334155; border: none; color: #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
     .status-line { font-size: 0.8rem; color: #94a3b8; margin-top: 8px; }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+    .banner { background: #0c4a3a; border: 1px solid #10b981; color: #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📚 Générateur de Définitions STMG</h1>
-    <p class="subtitle">Colle tes termes, l'IA fait le reste</p>
+    <p class="subtitle">L'IA invente et génère les termes toute seule, en continu</p>
 
     <div class="stats">
-      <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Générés</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-remaining">0</div><div class="stat-label">Restants</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-status">⏸️</div><div class="stat-label">État</div></div>
     </div>
 
     <div class="card">
@@ -74,15 +79,11 @@
     </div>
 
     <div class="card">
-      <h2>📝 Termes à générer</h2>
-      <textarea id="termsInput" placeholder="Prix d'équilibre&#10;Organigramme&#10;Contrat de travail&#10;Recrutement" oninput="updateStats()"></textarea>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:6px;">Un terme par ligne. La matière (Éco, Management, Droit, RH...) est déduite automatiquement.</p>
-
-      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-success" id="btnStart" onclick="startGeneration()">🚀 Générer</button>
-        <button class="btn btn-danger" id="btnStop" onclick="stopGeneration()" disabled>⏹️ Arrêter</button>
-        <button class="btn btn-primary" id="btnClear" onclick="clearTerms()">🗑️ Vider</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-success" id="btnStart" onclick="startGeneration()">🚀 Démarrer</button>
+        <button class="btn btn-danger" id="btnStop" onclick="stopGeneration()" disabled>⏹️ Arrêter et récupérer le JSON</button>
       </div>
+      <p style="color:#64748b;font-size:0.8rem;margin-top:10px;">Ça tourne sans s'arrêter tant que tu ne cliques pas sur "Arrêter". Tu peux fermer/rouvrir la page, la génération s'arrête seulement quand tu cliques Arrêter ou que tu quittes la page.</p>
     </div>
 
     <div class="card">
@@ -91,14 +92,17 @@
     </div>
 
     <div class="card hidden" id="resultsCard">
+      <div class="banner" id="stoppedBanner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier.</div>
       <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
-      <div id="resultsList"></div>
 
-      <div class="relative" style="margin-top:16px;">
-        <label>JSON final (Prêt à être copié/collé)</label>
-        <textarea id="jsonOutput" readonly style="min-height:150px;"></textarea>
+      <div class="relative" style="margin-bottom:16px;">
+        <label>JSON complet</label>
+        <textarea id="jsonOutput" readonly style="min-height:200px;"></textarea>
         <button class="copy-btn" onclick="copyJSON()">📋 Copier</button>
       </div>
+
+      <button class="btn btn-secondary" onclick="toggleCards()">👁️ Afficher / masquer le détail des fiches</button>
+      <div id="resultsList" class="hidden" style="margin-top:12px;"></div>
     </div>
   </div>
 
@@ -118,17 +122,14 @@
           storageAvailable = true;
           const savedKey = await safeGet('groq_api_key');
           if (savedKey) document.getElementById('apiKey').value = savedKey;
-          const savedTerms = await safeGet('stmg_terms');
-          if (savedTerms) document.getElementById('termsInput').value = savedTerms;
-          statusEl.textContent = 'Clé et liste mémorisées sur cet appareil.';
+          statusEl.textContent = 'Clé mémorisée sur cet appareil.';
         } else {
-          statusEl.textContent = "Mémorisation indisponible ici : rien n'est sauvegardé entre deux sessions.";
+          statusEl.textContent = "Mémorisation indisponible ici : la clé n'est pas sauvegardée entre deux sessions.";
         }
       } catch (e) {
         storageAvailable = false;
-        statusEl.textContent = "Mémorisation indisponible ici : rien n'est sauvegardé entre deux sessions.";
+        statusEl.textContent = "Mémorisation indisponible ici : la clé n'est pas sauvegardée entre deux sessions.";
       }
-      updateStats();
     }
 
     async function safeGet(key) {
@@ -157,32 +158,20 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function parseTerms() {
-      const input = document.getElementById('termsInput').value;
-      safeSet('stmg_terms', input);
-      return input.split('\n').map(l => l.trim()).filter(Boolean);
-    }
-
     function updateStats() {
-      const terms = parseTerms();
-      document.getElementById('stat-total').textContent = terms.length;
       document.getElementById('stat-done').textContent = definitions.length;
-      document.getElementById('stat-remaining').textContent = Math.max(0, terms.length - definitions.length);
-    }
-
-    function clearTerms() {
-      document.getElementById('termsInput').value = '';
-      definitions = [];
-      document.getElementById('resultsList').innerHTML = '';
-      document.getElementById('jsonOutput').value = '';
-      document.getElementById('resultsCard').classList.add('hidden');
-      updateStats();
+      const statusEl = document.getElementById('stat-status');
+      statusEl.textContent = isRunning ? '▶️' : '⏸️';
+      statusEl.classList.toggle('pulse', isRunning);
     }
 
     function setRunningUI(running) {
       document.getElementById('btnStart').disabled = running;
-      document.getElementById('btnClear').disabled = running;
       document.getElementById('btnStop').disabled = !running;
+    }
+
+    function toggleCards() {
+      document.getElementById('resultsList').classList.toggle('hidden');
     }
 
     async function startGeneration() {
@@ -194,43 +183,32 @@
         return;
       }
 
-      const terms = parseTerms();
-      if (terms.length === 0) {
-        log('❌ Aucun terme saisi.', 'error');
-        return;
-      }
-
       isRunning = true;
       shouldStop = false;
       setRunningUI(true);
-      log(`🚀 Début du traitement de ${terms.length} terme(s)...`, 'info');
+      updateStats();
+      document.getElementById('resultsCard').classList.add('hidden');
+      log('🚀 Génération continue démarrée...', 'info');
 
-      for (let i = 0; i < terms.length; i++) {
-        if (shouldStop) {
-          log('⏹️ Génération interrompue.', 'error');
-          break;
-        }
-
-        const terme = terms[i];
-        if (definitions.some(d => d.term.toLowerCase() === terme.toLowerCase())) continue;
-
-        log(`[${i + 1}/${terms.length}] Traitement : "${terme}"...`);
+      let count = 0;
+      while (!shouldStop) {
+        count++;
+        log(`[${count}] Génération d'un nouveau terme...`);
 
         let retried = false;
         try {
-          const res = await fetchDefinitionWithFallback(terme, apiKey);
-          if (res) {
+          const res = await fetchDefinitionWithFallback(apiKey);
+          if (res && !definitions.some(d => d.term.toLowerCase() === res.term.toLowerCase())) {
             definitions.push(res);
-            addResultCard(res);
-            updateJSON();
-            log(`✅ Généré : "${terme}" (${res.matiere})`, 'success');
+            log(`✅ "${res.term}" (${res.matiere})`, 'success');
+          } else if (res) {
+            log(`↩️ "${res.term}" déjà généré, on continue.`, 'info');
           }
         } catch (err) {
-          log(`❌ Erreur sur "${terme}": ${err.message}`, 'error');
+          log(`❌ Erreur : ${err.message}`, 'error');
           if (err.message.includes('429') && !shouldStop) {
             log('⏳ Rate limit dépassé. Pause de 5 secondes...', 'error');
             await sleep(5000);
-            i--;
             retried = true;
           } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key')) {
             log('🛑 Clé API invalide. Arrêt de la génération.', 'error');
@@ -239,21 +217,47 @@
         }
 
         updateStats();
-        if (!retried) await sleep(800);
+        if (!retried && !shouldStop) await sleep(700);
       }
 
       isRunning = false;
       setRunningUI(false);
-      log('🏁 Terminé !', 'success');
+      updateStats();
+      finalizeResults();
+      log(`🏁 Arrêté. ${definitions.length} fiche(s) au total.`, 'success');
     }
 
-    function stopGeneration() { shouldStop = true; }
+    function stopGeneration() {
+      shouldStop = true;
+      log('⏹️ Arrêt demandé, finalisation en cours...', 'info');
+    }
 
-    async function fetchDefinitionWithFallback(terme, apiKey) {
+    function finalizeResults() {
+      document.getElementById('resultsCard').classList.remove('hidden');
+      document.getElementById('resultsCount').textContent = definitions.length;
+      document.getElementById('jsonOutput').value = JSON.stringify(definitions, null, 2);
+      const list = document.getElementById('resultsList');
+      list.innerHTML = '';
+      definitions.forEach(def => {
+        const card = document.createElement('div');
+        card.className = 'definition-card';
+        card.innerHTML = `
+          <span class="badge">${escapeHTML(def.matiere)}</span>
+          <div class="term-title">${escapeHTML(def.term)}</div>
+          <div class="term-def">${escapeHTML(def.def)}</div>
+          ${def.example ? `<div class="term-sub">💡 Exemple : ${escapeHTML(def.example)}</div>` : ''}
+          ${def.remember ? `<div class="term-sub">🧠 Astuce : ${escapeHTML(def.remember)}</div>` : ''}
+        `;
+        list.appendChild(card);
+      });
+      document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function fetchDefinitionWithFallback(apiKey) {
       let lastErr;
       for (const model of MODEL_CHAIN) {
         try {
-          return await fetchDefinitionFromGroq(terme, apiKey, model);
+          return await fetchDefinitionFromGroq(apiKey, model);
         } catch (err) {
           lastErr = err;
           const msg = err.message.toLowerCase();
@@ -267,19 +271,26 @@
       throw lastErr;
     }
 
-    async function fetchDefinitionFromGroq(terme, apiKey, model) {
+    async function fetchDefinitionFromGroq(apiKey, model) {
+      // On envoie les termes déjà générés (les 40 derniers pour ne pas alourdir le prompt)
+      // pour que le modèle évite les doublons et choisisse un nouveau terme lui-même.
+      const already = definitions.slice(-40).map(d => d.term);
+
       const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG (lycée français : Management, Droit, Économie, Sciences de gestion et numérique, RH...).
-Pour le terme donné, identifie toi-même la matière STMG la plus pertinente.
+À chaque appel, choisis TOI-MÊME un terme ou une notion du programme STMG qui n'est PAS dans la liste des termes déjà traités, et génère sa fiche.
+Varie les matières (Management, Droit, Économie, Sciences de gestion et numérique, RH) et le niveau de difficulté au fil des appels.
+Termes déjà traités (à éviter absolument) : ${already.length ? already.join(', ') : 'aucun'}.
+
 Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
 {
-  "term": "nom du terme",
-  "matiere": "matière STMG déduite",
+  "term": "nom du terme choisi",
+  "matiere": "matière STMG",
   "def": "Définition courte et claire (2-3 phrases max)",
   "example": "Exemple concret (1 phrase) ou chaîne vide si inutile",
   "remember": "Moyen mnémotechnique ou idée-clé"
 }`;
 
-      const userPrompt = `Génère la fiche pour le terme "${terme}".`;
+      const userPrompt = `Propose un nouveau terme STMG et génère sa fiche.`;
 
       let response;
       try {
@@ -296,7 +307,7 @@ Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du J
               { role: 'user', content: userPrompt }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.2
+            temperature: 0.9
           })
         });
       } catch (networkErr) {
@@ -328,26 +339,6 @@ Tu dois répondre STRICTEMENT au format JSON suivant, sans aucun texte hors du J
       const div = document.createElement('div');
       div.textContent = str ?? '';
       return div.innerHTML;
-    }
-
-    function addResultCard(def) {
-      document.getElementById('resultsCard').classList.remove('hidden');
-      const list = document.getElementById('resultsList');
-      const card = document.createElement('div');
-      card.className = 'definition-card';
-      card.innerHTML = `
-        <span class="badge">${escapeHTML(def.matiere)}</span>
-        <div class="term-title">${escapeHTML(def.term)}</div>
-        <div class="term-def">${escapeHTML(def.def)}</div>
-        ${def.example ? `<div class="term-sub">💡 Exemple : ${escapeHTML(def.example)}</div>` : ''}
-        ${def.remember ? `<div class="term-sub">🧠 Astuce : ${escapeHTML(def.remember)}</div>` : ''}
-      `;
-      list.prepend(card);
-    }
-
-    function updateJSON() {
-      document.getElementById('jsonOutput').value = JSON.stringify(definitions, null, 2);
-      document.getElementById('resultsCount').textContent = definitions.length;
     }
 
     function copyJSON() {
