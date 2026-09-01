@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur de Définitions STMG (Groq API)</title>
+  <title>Générateur de Définitions STMG</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -62,6 +62,7 @@
     .banner { background: #0c4a3a; border: 1px solid #10b981; color: #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
     details { margin-top: 4px; }
     summary { cursor: pointer; color: #60a5fa; font-size: 0.85rem; padding: 4px 0; }
+    .optional-tag { color: #64748b; font-weight: 400; font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -70,13 +71,17 @@
     <p class="subtitle">L'IA invente et génère les termes toute seule, en continu</p>
 
     <div class="stats">
-      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées (cette session)</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées (session)</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-status">⏸️</div><div class="stat-label">État</div></div>
     </div>
 
     <div class="card">
       <label>Clé API Groq</label>
-      <input type="password" id="apiKey" placeholder="gsk_..." onchange="saveKey()">
+      <input type="password" id="apiKeyGroq" placeholder="gsk_..." onchange="saveKeys()">
+      <div style="margin-top:14px;">
+        <label>Clé API Gemini <span class="optional-tag">(optionnel — fait tourner un 2ᵉ générateur en parallèle, ~2x plus rapide)</span></label>
+        <input type="password" id="apiKeyGemini" placeholder="AIza... (depuis aistudio.google.com/apikey)" onchange="saveKeys()">
+      </div>
       <div class="status-line" id="storageStatus"></div>
     </div>
 
@@ -105,7 +110,7 @@
     </div>
 
     <div class="card hidden" id="resultsCard">
-      <div class="banner" id="stoppedBanner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier (y compris ce que tu avais importé).</div>
+      <div class="banner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier (y compris ce que tu avais importé).</div>
       <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
 
       <div class="relative" style="margin-bottom:16px;">
@@ -120,18 +125,27 @@
   </div>
 
   <script>
-    const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-    // Ordre de préférence : Llama 4 Scout (30 000 TPM en gratuit, largement le plus permissif)
-    // puis repli sur les GPT-OSS (8 000 TPM) si Scout venait à être retiré ou indisponible.
-    const MODEL_CHAIN = [
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'openai/gpt-oss-20b',
-      'openai/gpt-oss-120b'
-    ];
+    // --- Fournisseurs ---
+    // Groq : Llama 4 Scout en priorité (30 000 TPM en gratuit), repli sur les GPT-OSS (8 000 TPM).
+    // Gemini : utilisé via sa couche de compatibilité OpenAI, en parallèle de Groq si une clé est fournie.
+    const PROVIDERS = {
+      groq: {
+        label: 'Groq',
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        models: ['meta-llama/llama-4-scout-17b-16e-instruct', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+        useMaxTokensField: 'max_completion_tokens'
+      },
+      gemini: {
+        label: 'Gemini',
+        url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+        models: ['gemini-2.5-flash', 'gemini-2.0-flash'],
+        useMaxTokensField: 'max_tokens'
+      }
+    };
     const MATIERES_VALIDES = ['Management', 'Droit', 'Économie', 'RH'];
 
-    let definitions = [];       // fiches générées (session + importées), exportées telles quelles
-    let knownTerms = new Set(); // pour dédoublonnage rapide, insensible à la casse
+    let definitions = [];       // fiches générées (session + importées)
+    let knownTerms = new Set(); // dédoublonnage rapide, insensible à la casse, partagé entre workers
     let isRunning = false;
     let shouldStop = false;
     let storageAvailable = false;
@@ -141,15 +155,17 @@
       try {
         if (window.storage && typeof window.storage.get === 'function') {
           storageAvailable = true;
-          const savedKey = await safeGet('groq_api_key');
-          if (savedKey) document.getElementById('apiKey').value = savedKey;
-          statusEl.textContent = 'Clé mémorisée sur cet appareil.';
+          const savedGroq = await safeGet('groq_api_key');
+          if (savedGroq) document.getElementById('apiKeyGroq').value = savedGroq;
+          const savedGemini = await safeGet('gemini_api_key');
+          if (savedGemini) document.getElementById('apiKeyGemini').value = savedGemini;
+          statusEl.textContent = 'Clés mémorisées sur cet appareil.';
         } else {
-          statusEl.textContent = "Mémorisation indisponible ici : la clé n'est pas sauvegardée entre deux sessions.";
+          statusEl.textContent = "Mémorisation indisponible ici : les clés ne sont pas sauvegardées entre deux sessions.";
         }
       } catch (e) {
         storageAvailable = false;
-        statusEl.textContent = "Mémorisation indisponible ici : la clé n'est pas sauvegardée entre deux sessions.";
+        statusEl.textContent = "Mémorisation indisponible ici : les clés ne sont pas sauvegardées entre deux sessions.";
       }
     }
 
@@ -165,8 +181,9 @@
       try { await window.storage.set(key, value, false); } catch (e) { }
     }
 
-    function saveKey() {
-      safeSet('groq_api_key', document.getElementById('apiKey').value.trim());
+    function saveKeys() {
+      safeSet('groq_api_key', document.getElementById('apiKeyGroq').value.trim());
+      safeSet('gemini_api_key', document.getElementById('apiKeyGemini').value.trim());
     }
 
     function log(msg, type = 'info') {
@@ -228,8 +245,9 @@
     async function startGeneration() {
       if (isRunning) return;
 
-      const apiKey = document.getElementById('apiKey').value.trim();
-      if (!apiKey) {
+      const groqKey = document.getElementById('apiKeyGroq').value.trim();
+      const geminiKey = document.getElementById('apiKeyGemini').value.trim();
+      if (!groqKey) {
         log('❌ Clé API Groq manquante !', 'error');
         return;
       }
@@ -239,41 +257,16 @@
       setRunningUI(true);
       updateStats();
       document.getElementById('resultsCard').classList.add('hidden');
-      log(`🚀 Génération continue démarrée (${knownTerms.size} terme(s) déjà connus)...`, 'info');
 
-      let count = 0;
-      while (!shouldStop) {
-        count++;
-        log(`[${count}] Génération d'un nouveau terme...`);
-
-        let waitMs = 0;
-        try {
-          const res = await fetchDefinitionWithFallback(apiKey);
-          if (res) {
-            const key = res.term.toLowerCase();
-            if (!knownTerms.has(key)) {
-              definitions.push(res);
-              knownTerms.add(key);
-              log(`✅ "${res.term}" (${res.matiere})`, 'success');
-            } else {
-              log(`↩️ "${res.term}" déjà généré, on continue.`, 'info');
-            }
-          }
-        } catch (err) {
-          log(`❌ Erreur : ${err.message}`, 'error');
-          if (err.message.startsWith('RATE_LIMIT:') && !shouldStop) {
-            waitMs = parseInt(err.message.split(':')[1], 10) || 5000;
-            log(`⏳ Rate limit dépassé. Pause de ${(waitMs / 1000).toFixed(1)}s...`, 'error');
-            await sleep(waitMs);
-          } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key')) {
-            log('🛑 Clé API invalide. Arrêt de la génération.', 'error');
-            shouldStop = true;
-          }
-        }
-
-        updateStats();
-        if (waitMs === 0 && !shouldStop) await sleep(1500);
+      const workers = [runWorker('groq', groqKey)];
+      if (geminiKey) {
+        log('🚀 Génération démarrée sur 2 fournisseurs en parallèle (Groq + Gemini)...', 'info');
+        workers.push(runWorker('gemini', geminiKey));
+      } else {
+        log('🚀 Génération démarrée sur Groq...', 'info');
       }
+
+      await Promise.all(workers);
 
       isRunning = false;
       setRunningUI(false);
@@ -285,6 +278,39 @@
     function stopGeneration() {
       shouldStop = true;
       log('⏹️ Arrêt demandé, finalisation en cours...', 'info');
+    }
+
+    // Une boucle indépendante par fournisseur ; elles tournent en même temps et partagent knownTerms.
+    async function runWorker(providerKey, apiKey) {
+      const provider = PROVIDERS[providerKey];
+      while (!shouldStop) {
+        let waitMs = 0;
+        try {
+          const res = await fetchValidDefinition(provider, apiKey);
+          if (res) {
+            const k = res.term.toLowerCase();
+            if (!knownTerms.has(k)) {
+              definitions.push(res);
+              knownTerms.add(k);
+              log(`✅ [${provider.label}] "${res.term}" (${res.matiere})`, 'success');
+            } else {
+              log(`↩️ [${provider.label}] "${res.term}" déjà généré, on continue.`, 'info');
+            }
+          }
+        } catch (err) {
+          log(`❌ [${provider.label}] ${err.message}`, 'error');
+          if (err.message.startsWith('RATE_LIMIT:') && !shouldStop) {
+            waitMs = parseInt(err.message.split(':')[1], 10) || 8000;
+            log(`⏳ [${provider.label}] pause de ${(waitMs / 1000).toFixed(1)}s...`, 'error');
+            await sleep(waitMs);
+          } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key') || err.message.toLowerCase().includes('api key not valid')) {
+            log(`🛑 [${provider.label}] clé API invalide, ce fournisseur s'arrête (l'autre continue si actif).`, 'error');
+            return;
+          }
+        }
+        updateStats();
+        if (waitMs === 0 && !shouldStop) await sleep(1500);
+      }
     }
 
     function finalizeResults() {
@@ -308,50 +334,48 @@
       document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    async function fetchDefinitionWithFallback(apiKey) {
+    async function fetchValidDefinition(provider, apiKey) {
       let lastErr;
-      for (const model of MODEL_CHAIN) {
+      for (const model of provider.models) {
         try {
-          return await fetchValidDefinition(apiKey, model);
+          return await fetchValidFromModel(provider, apiKey, model);
         } catch (err) {
           lastErr = err;
           const msg = err.message.toLowerCase();
-          if (msg.includes('404') || msg.includes('does not exist') || msg.includes('decommissioned')) {
-            log(`↪️ Modèle "${model}" indisponible, essai suivant...`, 'info');
+          if (msg.includes('404') || msg.includes('does not exist') || msg.includes('decommissioned') || msg.includes('not found')) {
+            log(`↪️ [${provider.label}] modèle "${model}" indisponible, essai suivant...`, 'info');
             continue;
           }
-          throw err; // rate limit, 401, réseau -> on remonte direct, pas de fallback de modèle
+          throw err; // rate limit / 401 / réseau -> pas de fallback de modèle, on remonte
         }
       }
       throw lastErr;
     }
 
     // Redemande une fiche tant que la matière renvoyée n'est pas une des 4 valides (max 2 tentatives)
-    async function fetchValidDefinition(apiKey, model) {
+    async function fetchValidFromModel(provider, apiKey, model) {
       let lastParsed = null;
       for (let attempt = 0; attempt < 2; attempt++) {
-        const parsed = await fetchDefinitionFromGroq(apiKey, model);
+        const parsed = await callProvider(provider, apiKey, model);
         const normalized = normalizeMatiere(parsed.matiere);
         if (normalized) {
           parsed.matiere = normalized;
           return parsed;
         }
         lastParsed = parsed;
-        log(`↪️ Matière "${parsed.matiere}" hors liste, nouvelle tentative...`, 'info');
       }
-      throw new Error(`Matière invalide reçue du modèle : "${lastParsed?.matiere}"`);
+      throw new Error(`Matière invalide reçue : "${lastParsed?.matiere}"`);
     }
 
     function normalizeMatiere(m) {
       if (!m) return null;
       const clean = m.trim().toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // enlève les accents pour comparer
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const map = { 'management': 'Management', 'droit': 'Droit', 'economie': 'Économie', 'rh': 'RH', 'ressources humaines': 'RH' };
       return map[clean] || null;
     }
 
-    async function fetchDefinitionFromGroq(apiKey, model) {
-      // On n'envoie que les 10 derniers termes connus pour limiter la taille du prompt (économie de tokens).
+    async function callProvider(provider, apiKey, model) {
       const recent = Array.from(knownTerms).slice(-10);
 
       const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG (lycée français).
@@ -371,27 +395,29 @@ Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
 
       const userPrompt = `Propose un nouveau terme STMG et génère sa fiche.`;
 
+      const body = {
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.9
+      };
+      body[provider.useMaxTokensField] = 400;
+
       let response;
       try {
-        response = await fetch(GROQ_URL, {
+        response = await fetch(provider.url, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            model: model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.9,
-            max_completion_tokens: 400
-          })
+          body: JSON.stringify(body)
         });
       } catch (networkErr) {
-        throw new Error(`Réseau : impossible de joindre l'API Groq (${networkErr.message})`);
+        throw new Error(`Réseau : impossible de joindre l'API (${networkErr.message})`);
       }
 
       if (!response.ok) {
@@ -399,13 +425,12 @@ Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
         let bodyText = '';
         try {
           const errorData = await response.json();
-          bodyText = errorData?.error?.message || '';
+          bodyText = errorData?.error?.message || JSON.stringify(errorData?.error || errorData);
           if (bodyText) errMsg = bodyText + ` (${response.status})`;
         } catch (e) { }
 
         if (response.status === 429) {
-          // On essaie d'extraire "try again in Xs" / "Xms" / "Xm Ys" renvoyé par Groq pour attendre pile ce qu'il faut.
-          const waitMs = parseRetryAfter(bodyText) ?? 5000;
+          const waitMs = parseRetryAfter(bodyText) ?? 8000;
           throw new Error(`RATE_LIMIT:${waitMs}:${errMsg}`);
         }
         throw new Error(errMsg);
@@ -425,7 +450,10 @@ Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
 
     function parseRetryAfter(text) {
       if (!text) return null;
-      // Formats vus chez Groq : "try again in 22.5ms", "try again in 6m 11.52s", "try again in 3.2s"
+      // Groq : "try again in 22.5ms" / "try again in 6m 11.52s" / "try again in 3.2s"
+      // Gemini : souvent "retryDelay":"38s" dans les détails de l'erreur
+      const retryDelayMatch = text.match(/retryDelay"\s*:\s*"([\d.]+)s"/);
+      if (retryDelayMatch) return parseFloat(retryDelayMatch[1]) * 1000;
       const mMatch = text.match(/(\d+)m\s*([\d.]+)s/);
       if (mMatch) return (parseInt(mMatch[1], 10) * 60 + parseFloat(mMatch[2])) * 1000;
       const sMatch = text.match(/([\d.]+)s\b/);
