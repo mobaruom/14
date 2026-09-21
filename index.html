@@ -1,507 +1,968 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur de Définitions STMG</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .container { max-width: 900px; margin: 0 auto; }
-    h1 { text-align: center; color: #60a5fa; margin-bottom: 8px; font-size: 1.8rem; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem; }
-    .card { background: #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #334155; }
-    .card h2 { color: #60a5fa; font-size: 1.1rem; margin-bottom: 12px; }
-    label { display: block; margin-bottom: 6px; color: #cbd5e1; font-size: 0.9rem; font-weight: 500; }
-    input, textarea {
-      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #475569;
-      background: #0f172a; color: #e2e8f0; font-size: 0.95rem; transition: border-color 0.2s;
-    }
-    input:focus, textarea:focus { outline: none; border-color: #60a5fa; }
-    textarea { min-height: 120px; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.5; }
-    .btn {
-      padding: 14px 24px; border-radius: 10px; border: none; font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-      width: 100%; justify-content: center;
-    }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover:not(:disabled) { background: #2563eb; }
-    .btn-success { background: #10b981; color: white; }
-    .btn-success:hover:not(:disabled) { background: #059669; }
-    .btn-danger { background: #ef4444; color: white; }
-    .btn-danger:hover:not(:disabled) { background: #dc2626; }
-    .btn-secondary { background: #334155; color: #e2e8f0; width: auto; padding: 10px 18px; font-size: 0.9rem; }
-    .btn-secondary:hover:not(:disabled) { background: #475569; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .stat-box { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
-    .stat-value { font-size: 1.6rem; font-weight: 700; color: #60a5fa; }
-    .stat-label { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
-    .log { background: #0f172a; border-radius: 10px; padding: 12px; max-height: 250px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; border: 1px solid #334155; }
-    .log-entry { padding: 4px 0; border-bottom: 1px solid #1e293b; }
-    .log-success { color: #34d399; }
-    .log-error { color: #f87171; }
-    .log-info { color: #60a5fa; }
-    .definition-card { background: #0f172a; border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background: #3b82f620; color: #60a5fa; }
-    .term-title { font-weight: 700; font-size: 1rem; margin: 6px 0; }
-    .term-def { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
-    .term-sub { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; font-style: italic; }
-    .hidden { display: none !important; }
-    .relative { position: relative; }
-    .copy-btn { position: absolute; top: 12px; right: 12px; background: #334155; border: none; color: #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    .status-line { font-size: 0.8rem; color: #94a3b8; margin-top: 8px; }
-    .pulse { animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
-    .banner { background: #0c4a3a; border: 1px solid #10b981; color: #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
-    details { margin-top: 4px; }
-    summary { cursor: pointer; color: #60a5fa; font-size: 0.85rem; padding: 4px 0; }
-    .optional-tag { color: #64748b; font-weight: 400; font-size: 0.8rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d0d0d">
+<title>ForexVision AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: #0d0d0d;
+}
+
+body {
+  background: #0d0d0d;
+  color: #f0f0f0;
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+}
+
+/* ===== PAGE ===== */
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.header-logo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.header-logo span {
+  color: #7c5cfc;
+}
+
+.header-badge {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #7c5cfc;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  background: #7c5cfc;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(124, 92, 252, 0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(124, 92, 252, 0); }
+}
+
+/* ===== SECRET CODE BAR ===== */
+.secret-bar {
+  background: #111118;
+  border: 1px solid #222230;
+  border-radius: 14px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.secret-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #555570;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.secret-divider {
+  width: 1px;
+  height: 18px;
+  background: #222230;
+  flex-shrink: 0;
+}
+
+.secret-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #a090ff;
+  min-width: 0;
+}
+
+.secret-input::placeholder {
+  color: #333345;
+}
+
+.secret-saved {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #5fce8f;
+  opacity: 0;
+  transition: opacity 0.4s;
+  white-space: nowrap;
+}
+
+.secret-saved.visible {
+  opacity: 1;
+}
+
+/* ===== GRID ===== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: #111118;
+  border: 1px solid #1e1e2e;
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #444460;
+  margin-bottom: 18px;
+}
+
+/* ===== UPLOAD CARD ===== */
+.upload-card {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.drop-area {
+  border: 1.5px dashed #252535;
+  border-radius: 14px;
+  padding: 36px 20px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s, background 0.2s;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-area:hover,
+.drop-area.dragover {
+  border-color: #7c5cfc;
+  background: rgba(124, 92, 252, 0.04);
+}
+
+.drop-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.drop-content {
+  pointer-events: none;
+}
+
+.drop-emoji {
+  font-size: 34px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.drop-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ccccdd;
+  margin-bottom: 6px;
+}
+
+.drop-sub {
+  font-size: 12px;
+  color: #444455;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.preview-wrap {
+  display: none;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-wrap img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  padding: 12px 14px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* TIMEFRAME */
+.tf-section {
+  margin-top: 20px;
+}
+
+.tf-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tf-btn {
+  background: #0d0d18;
+  border: 1px solid #1e1e2e;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #555570;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tf-btn:hover {
+  border-color: #7c5cfc;
+  color: #a090ff;
+}
+
+.tf-btn.active {
+  background: rgba(124, 92, 252, 0.12);
+  border-color: #7c5cfc;
+  color: #a090ff;
+  font-weight: 500;
+}
+
+/* ANALYZE BUTTON */
+.btn-analyze {
+  width: 100%;
+  margin-top: 20px;
+  background: linear-gradient(135deg, #7c5cfc, #a078ff);
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 24px rgba(124, 92, 252, 0.25);
+}
+
+.btn-analyze:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(124, 92, 252, 0.35);
+}
+
+.btn-analyze:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===== RESULT CARD ===== */
+.result-card {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  min-height: 240px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  gap: 10px;
+  color: #333345;
+}
+
+.empty-icon {
+  font-size: 36px;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.result-content {
+  display: none;
+}
+
+/* Signal */
+.signal-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.signal-badge {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.signal-badge.buy { color: #5fce8f; text-shadow: 0 0 24px rgba(95, 206, 143, 0.3); }
+.signal-badge.sell { color: #ff5577; text-shadow: 0 0 24px rgba(255, 85, 119, 0.3); }
+.signal-badge.wait { color: #ffcc44; text-shadow: 0 0 24px rgba(255, 204, 68, 0.3); }
+
+.pair-info {
+  text-align: right;
+}
+
+.pair-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #a090ff;
+  margin-bottom: 4px;
+}
+
+.conf-label {
+  font-size: 11px;
+  color: #444460;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.conf-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+/* Levels */
+.levels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.level-box {
+  background: #0d0d18;
+  border: 1px solid #1e1e2e;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.level-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #444460;
+  margin-bottom: 6px;
+}
+
+.level-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.level-value.entry { color: #f0f0f0; }
+.level-value.tp { color: #5fce8f; }
+.level-value.sl { color: #ff5577; }
+
+.level-note {
+  font-size: 10px;
+  color: #333345;
+  line-height: 1.3;
+}
+
+/* Analysis text */
+.analysis-text {
+  background: #0d0d18;
+  border-left: 2px solid #7c5cfc;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #8888aa;
+}
+
+/* ===== STATS CARD ===== */
+.stats-card {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #1a1a28;
+  font-size: 13px;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #444460;
+  letter-spacing: 1px;
+}
+
+.stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ===== ADVICE CARD ===== */
+.advice-card {
+  grid-column: 1 / 3;
+}
+
+.advice-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.advice-item {
+  background: #0d0d18;
+  border: 1px solid #1a1a28;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.advice-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.advice-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #7070a0;
+}
+
+/* ===== LOADING OVERLAY ===== */
+.loading {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 13, 24, 0.92);
+  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+}
+
+.loading.show {
+  display: flex;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #1e1e2e;
+  border-top-color: #7c5cfc;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #555570;
+  letter-spacing: 2px;
+  animation: blink 1.5s ease infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  margin-top: 36px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #2a2a3a;
+  letter-spacing: 1px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header { animation: fadeUp 0.5s ease both; }
+.secret-bar { animation: fadeUp 0.5s 0.05s ease both; }
+.upload-card { animation: fadeUp 0.5s 0.1s ease both; }
+.result-card { animation: fadeUp 0.5s 0.15s ease both; }
+.stats-card { animation: fadeUp 0.5s 0.2s ease both; }
+.advice-card { animation: fadeUp 0.5s 0.25s ease both; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .upload-card { grid-column: 1; grid-row: auto; }
+  .result-card { grid-column: 1; grid-row: auto; }
+  .stats-card { grid-column: 1; grid-row: auto; }
+  .advice-card { grid-column: 1; grid-row: auto; }
+  .advice-list { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .levels { grid-template-columns: 1fr; }
+}
+
+</style>
+
 </head>
 <body>
-  <div class="container">
-    <h1>📚 Générateur de Définitions STMG</h1>
-    <p class="subtitle">L'IA invente et génère les termes toute seule, en continu</p>
 
-    <div class="stats">
-      <div class="stat-box"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Fiches générées (session)</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-status">⏸️</div><div class="stat-label">État</div></div>
-    </div>
+<div class="page">
 
-    <div class="card">
-      <label>Clé API Groq</label>
-      <input type="password" id="apiKeyGroq" placeholder="gsk_..." onchange="saveKeys()">
-      <div style="margin-top:14px;">
-        <label>Clé API Gemini <span class="optional-tag">(optionnel — fait tourner un 2ᵉ générateur en parallèle, ~2x plus rapide)</span></label>
-        <input type="password" id="apiKeyGemini" placeholder="AIza... (depuis aistudio.google.com/apikey)" onchange="saveKeys()">
-      </div>
-      <div class="status-line" id="storageStatus"></div>
-    </div>
+  <!-- HEADER -->
 
-    <div class="card">
-      <details>
-        <summary>📂 Importer un JSON déjà généré (pour éviter les doublons entre deux sessions)</summary>
-        <div style="margin-top:10px;">
-          <textarea id="importInput" placeholder='Colle ici le JSON exporté précédemment, ex: [{"term":"...","matiere":"...","def":"...","example":"...","remember":"..."}, ...]'></textarea>
-          <button class="btn btn-secondary" style="margin-top:8px;" onclick="importJSON()">📥 Importer cette liste</button>
-          <div class="status-line" id="importStatus"></div>
-        </div>
-      </details>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-success" id="btnStart" onclick="startGeneration()">🚀 Démarrer</button>
-        <button class="btn btn-danger" id="btnStop" onclick="stopGeneration()" disabled>⏹️ Arrêter et récupérer le JSON</button>
-      </div>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:10px;">Ça tourne sans s'arrêter tant que tu ne cliques pas sur "Arrêter".</p>
-    </div>
-
-    <div class="card">
-      <h2>📋 Console de Suivi</h2>
-      <div class="log" id="log"></div>
-    </div>
-
-    <div class="card hidden" id="resultsCard">
-      <div class="banner">✅ Génération arrêtée — voici tout ton JSON, prêt à copier (y compris ce que tu avais importé).</div>
-      <h2>✅ Résultats (<span id="resultsCount">0</span>)</h2>
-
-      <div class="relative" style="margin-bottom:16px;">
-        <label>JSON complet</label>
-        <textarea id="jsonOutput" readonly style="min-height:200px;"></textarea>
-        <button class="copy-btn" onclick="copyJSON()">📋 Copier</button>
-      </div>
-
-      <button class="btn btn-secondary" onclick="toggleCards()">👁️ Afficher / masquer le détail des fiches</button>
-      <div id="resultsList" class="hidden" style="margin-top:12px;"></div>
+  <div class="header">
+    <div class="header-logo">Forex<span>Vision</span></div>
+    <div class="header-badge">
+      <div class="pulse"></div>
+      AI POWERED
     </div>
   </div>
 
-  <script>
-    // --- Fournisseurs ---
-    // Groq : Llama 4 Scout en priorité (30 000 TPM en gratuit), repli sur Llama 4 Maverick.
-    // Les GPT-OSS ont été retirés : ce sont des modèles "à raisonnement" qui consomment une partie
-    // du budget de tokens de sortie en réflexion cachée, ce qui coupait le JSON en cours de génération.
-    // Gemini : gemini-2.0-flash a été retiré par Google le 1er juin 2026 (d'où l'erreur 404 vue en test).
-    // On utilise désormais gemini-3.6-flash (modèle courant, tier gratuit) avec repli sur 3.5 Flash-Lite,
-    // via la couche de compatibilité OpenAI de Google, en parallèle de Groq si une clé est fournie.
-    const PROVIDERS = {
-      groq: {
-        label: 'Groq',
-        url: 'https://api.groq.com/openai/v1/chat/completions',
-        models: ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'],
-        useMaxTokensField: 'max_completion_tokens'
-      },
-      gemini: {
-        label: 'Gemini',
-        url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-        models: ['gemini-3.6-flash', 'gemini-3.5-flash-lite'],
-        useMaxTokensField: 'max_tokens'
-      }
+  <!-- SECRET CODE BAR -->
+
+  <div class="secret-bar">
+    <span class="secret-label">Code Secret</span>
+    <div class="secret-divider"></div>
+    <input
+      type="password"
+      id="api-input"
+      class="secret-input"
+      placeholder="Entrez votre code secret ici..."
+      oninput="handleKeyInput()"
+    >
+    <span class="secret-saved" id="saved-label">&#10003; Sauvegarde</span>
+  </div>
+
+  <!-- GRID -->
+
+  <div class="grid">
+
+```
+<!-- UPLOAD CARD -->
+<div class="card upload-card">
+  <div class="card-title">Graphique</div>
+
+  <div class="drop-area" id="drop-area">
+    <input type="file" id="file-input" accept="image/*">
+    <div class="drop-content" id="drop-prompt">
+      <span class="drop-emoji">&#128202;</span>
+      <div class="drop-title">Deposer votre screenshot</div>
+      <div class="drop-sub">TradingView &middot; MT4 &middot; MT5</div>
+    </div>
+    <div class="preview-wrap" id="preview-wrap">
+      <img id="preview-img" src="" alt="preview">
+      <div class="preview-label" id="preview-name"></div>
+    </div>
+  </div>
+
+  <div class="tf-section">
+    <div class="card-title">Timeframe</div>
+    <div class="tf-grid">
+      <button class="tf-btn" data-tf="M1">M1</button>
+      <button class="tf-btn" data-tf="M5">M5</button>
+      <button class="tf-btn" data-tf="M15">M15</button>
+      <button class="tf-btn" data-tf="M30">M30</button>
+      <button class="tf-btn active" data-tf="H1">H1</button>
+      <button class="tf-btn" data-tf="H4">H4</button>
+      <button class="tf-btn" data-tf="D1">D1</button>
+      <button class="tf-btn" data-tf="W1">W1</button>
+    </div>
+  </div>
+
+  <button class="btn-analyze" id="btn-analyze" disabled onclick="runAnalysis()">
+    Analyser le graphique
+  </button>
+</div>
+
+<!-- RESULT CARD -->
+<div class="card result-card" id="result-card">
+  <div class="card-title">Analyse IA</div>
+
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">&#128269;</div>
+    <div class="empty-text">En attente d'un graphique</div>
+  </div>
+
+  <div class="result-content" id="result-content">
+    <div class="signal-row">
+      <div class="signal-badge buy" id="signal-badge">BUY</div>
+      <div class="pair-info">
+        <div class="pair-name" id="pair-name">---</div>
+        <div class="conf-label">Confiance</div>
+        <div class="conf-value" id="conf-value">--%</div>
+      </div>
+    </div>
+
+    <div class="levels">
+      <div class="level-box">
+        <div class="level-label">Entree</div>
+        <div class="level-value entry" id="entry-val">--</div>
+        <div class="level-note" id="entry-note">Zone d'entree</div>
+      </div>
+      <div class="level-box">
+        <div class="level-label">Take Profit</div>
+        <div class="level-value tp" id="tp-val">--</div>
+        <div class="level-note" id="tp-note">Objectif</div>
+      </div>
+      <div class="level-box">
+        <div class="level-label">Stop Loss</div>
+        <div class="level-value sl" id="sl-val">--</div>
+        <div class="level-note" id="sl-note">Invalidation</div>
+      </div>
+    </div>
+
+    <div class="analysis-text" id="analysis-text"></div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Analyse en cours...</div>
+  </div>
+</div>
+
+<!-- STATS CARD -->
+<div class="card stats-card">
+  <div class="card-title">Statistiques</div>
+  <div class="stats-grid">
+    <div>
+      <div class="stat-row">
+        <span class="stat-name">PAIRE</span>
+        <span class="stat-val" id="s-pair" style="color:#a090ff">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-name">RATIO R/R</span>
+        <span class="stat-val" id="s-rr" style="color:#5fce8f">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-name">TENDANCE</span>
+        <span class="stat-val" id="s-trend">--</span>
+      </div>
+    </div>
+    <div>
+      <div class="stat-row">
+        <span class="stat-name">MOMENTUM</span>
+        <span class="stat-val" id="s-momentum">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-name">SETUP</span>
+        <span class="stat-val" id="s-setup">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-name">STRUCTURE</span>
+        <span class="stat-val" id="s-structure">--</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADVICE CARD -->
+<div class="card advice-card">
+  <div class="card-title">Conseils</div>
+  <div class="advice-list" id="advice-list">
+    <div class="advice-item">
+      <span class="advice-icon">&#128161;</span>
+      <span class="advice-text">Lancez une analyse pour obtenir des conseils personnalises.</span>
+    </div>
+    <div class="advice-item">
+      <span class="advice-icon">&#9888;</span>
+      <span class="advice-text">Ne risquez jamais plus de 1 a 2% de votre capital par trade.</span>
+    </div>
+    <div class="advice-item">
+      <span class="advice-icon">&#128200;</span>
+      <span class="advice-text">Confirmez toujours votre setup sur plusieurs timeframes.</span>
+    </div>
+    <div class="advice-item">
+      <span class="advice-icon">&#128737;</span>
+      <span class="advice-text">Utilisez toujours un stop loss et respectez votre plan de trading.</span>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="footer">ForexVision &mdash; Pour usage educatif uniquement</div>
+
+</div>
+
+<script>
+
+  let imageBase64 = null;
+  let selectedTf = 'H1';
+
+  // Load saved key
+  const savedKey = localStorage.getItem('fxv_key');
+  if (savedKey) {
+    document.getElementById('api-input').value = savedKey;
+    document.getElementById('saved-label').classList.add('visible');
+    checkReady();
+  }
+
+  function handleKeyInput() {
+    const k = document.getElementById('api-input').value.trim();
+    const label = document.getElementById('saved-label');
+    if (k.length > 10) {
+      localStorage.setItem('fxv_key', k);
+      label.classList.add('visible');
+    } else {
+      localStorage.removeItem('fxv_key');
+      label.classList.remove('visible');
+    }
+    checkReady();
+  }
+
+  // Timeframe buttons
+  document.querySelectorAll('.tf-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tf-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedTf = btn.dataset.tf;
+    });
+  });
+
+  // Upload
+  var dropArea = document.getElementById('drop-area');
+  var fileInput = document.getElementById('file-input');
+
+  dropArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    dropArea.classList.add('dragover');
+  });
+
+  dropArea.addEventListener('dragleave', function() {
+    dropArea.classList.remove('dragover');
+  });
+
+  dropArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropArea.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', function(e) {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      imageBase64 = e.target.result.split(',')[1];
+      document.getElementById('preview-img').src = e.target.result;
+      document.getElementById('preview-name').textContent = file.name;
+      document.getElementById('drop-prompt').style.display = 'none';
+      var pw = document.getElementById('preview-wrap');
+      pw.style.display = 'block';
+      dropArea.style.padding = '0';
+      dropArea.style.border = 'none';
+      checkReady();
     };
-    const MATIERES_VALIDES = ['Management', 'Droit', 'Économie', 'RH'];
+    reader.readAsDataURL(file);
+  }
 
-    let definitions = [];       // fiches générées (session + importées)
-    let knownTerms = new Set(); // dédoublonnage rapide, insensible à la casse, partagé entre workers
-    let isRunning = false;
-    let shouldStop = false;
-    let storageAvailable = false;
+  function checkReady() {
+    var k = document.getElementById('api-input').value.trim();
+    document.getElementById('btn-analyze').disabled = !(imageBase64 && k.length > 10);
+  }
 
-    async function initStorage() {
-      const statusEl = document.getElementById('storageStatus');
-      try {
-        if (window.storage && typeof window.storage.get === 'function') {
-          storageAvailable = true;
-          const savedGroq = await safeGet('groq_api_key');
-          if (savedGroq) document.getElementById('apiKeyGroq').value = savedGroq;
-          const savedGemini = await safeGet('gemini_api_key');
-          if (savedGemini) document.getElementById('apiKeyGemini').value = savedGemini;
-          statusEl.textContent = 'Clés mémorisées sur cet appareil.';
-        } else {
-          statusEl.textContent = "Mémorisation indisponible ici : les clés ne sont pas sauvegardées entre deux sessions.";
-        }
-      } catch (e) {
-        storageAvailable = false;
-        statusEl.textContent = "Mémorisation indisponible ici : les clés ne sont pas sauvegardées entre deux sessions.";
-      }
-    }
+  // Analysis
+  async function runAnalysis() {
+    var apiKey = document.getElementById('api-input').value.trim();
+    if (!apiKey || !imageBase64) return;
 
-    async function safeGet(key) {
-      try {
-        const result = await window.storage.get(key, false);
-        return result ? result.value : null;
-      } catch (e) { return null; }
-    }
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('btn-analyze').disabled = true;
 
-    async function safeSet(key, value) {
-      if (!storageAvailable) return;
-      try { await window.storage.set(key, value, false); } catch (e) { }
-    }
+    var prompt = "Tu es un analyste technique Forex et matieres premieres de niveau institutionnel. Analyse ce graphique de trading avec une precision maximale.\n\nINSTRUCTIONS :\n1. Identifie AUTOMATIQUEMENT la paire tradee (EUR/USD, GBP/USD, XAU/USD, USD/JPY, NAS100, SP500, BTC/USD, etc.) en lisant les labels visibles sur le graphique\n2. Analyse complete : structure de marche (Higher Highs/Higher Lows), zones de support et resistance, patterns de chandeliers (pin bar, engulfing, doji), indicateurs visibles (EMA, RSI, MACD, Bollinger), niveaux psychologiques\n3. Donne des niveaux de prix EXACTS en lisant les valeurs sur le graphique\n4. Timeframe analyse : " + selectedTf + "\n\nReponds UNIQUEMENT avec ce JSON valide, sans aucun texte avant ou apres :\n{\"pair\":\"XAU/USD\",\"signal\":\"BUY\",\"confidence\":78,\"entry\":\"2342.50\",\"entry_note\":\"Rebond support H1\",\"tp\":\"2368.00\",\"tp_note\":\"Resistance majeure R/R 1:2\",\"sl\":\"2330.00\",\"sl_note\":\"Sous le dernier bas\",\"rr_ratio\":\"1:2.1\",\"trend\":\"Haussier\",\"momentum\":\"Fort\",\"setup\":\"Pullback EMA50\",\"structure\":\"HH/HL confirme\",\"analysis\":\"Analyse detaillee : decris la structure de marche, le pattern identifie, les confluences techniques et la logique du signal. Mentionne les indicateurs visibles et les niveaux cles.\",\"advices\":[{\"icon\":\"checkmark\",\"text\":\"Conseil precis base sur ce graphique\"},{\"icon\":\"warning\",\"text\":\"Risque specifique a ce setup\"},{\"icon\":\"chart\",\"text\":\"Confirmation a attendre avant d'entrer\"},{\"icon\":\"idea\",\"text\":\"Conseil gestion du trade\"}]}";
 
-    function saveKeys() {
-      safeSet('groq_api_key', document.getElementById('apiKeyGroq').value.trim());
-      safeSet('gemini_api_key', document.getElementById('apiKeyGemini').value.trim());
-    }
-
-    function log(msg, type = 'info') {
-      const logEl = document.getElementById('log');
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      const time = new Date().toLocaleTimeString('fr-FR');
-      entry.textContent = `[${time}] ${msg}`;
-      logEl.appendChild(entry);
-      logEl.scrollTop = logEl.scrollHeight;
-    }
-
-    function importJSON() {
-      const raw = document.getElementById('importInput').value.trim();
-      const statusEl = document.getElementById('importStatus');
-      if (!raw) { statusEl.textContent = ''; return; }
-
-      let parsed;
-      try {
-        parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) throw new Error('pas un tableau');
-      } catch (e) {
-        statusEl.textContent = '❌ JSON invalide : vérifie le format collé.';
-        statusEl.style.color = '#f87171';
-        return;
-      }
-
-      let added = 0;
-      parsed.forEach(item => {
-        if (item && item.term && !knownTerms.has(item.term.toLowerCase())) {
-          definitions.push(item);
-          knownTerms.add(item.term.toLowerCase());
-          added++;
-        }
+    try {
+      var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          max_tokens: 1200,
+          temperature: 0.1,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image_url", image_url: { url: "data:image/jpeg;base64," + imageBase64 } },
+              { type: "text", text: prompt }
+            ]
+          }]
+        })
       });
 
-      statusEl.style.color = '#34d399';
-      statusEl.textContent = `✅ ${added} terme(s) importé(s) et pris en compte pour éviter les doublons.`;
-      log(`📥 ${added} terme(s) importé(s) depuis le JSON collé.`, 'success');
-      updateStats();
+      var data = await response.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+      var text = data.choices[0].message.content.trim();
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      var match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("Reponse IA invalide");
+
+      var r = JSON.parse(match[0]);
+      showResult(r);
+
+    } catch(err) {
+      showError(err.message);
+    } finally {
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('btn-analyze').disabled = false;
     }
+  }
 
-    function updateStats() {
-      document.getElementById('stat-done').textContent = definitions.length;
-      const statusEl = document.getElementById('stat-status');
-      statusEl.textContent = isRunning ? '▶️' : '⏸️';
-      statusEl.classList.toggle('pulse', isRunning);
+  var iconMap = {
+    'checkmark': '&#10003;',
+    'warning': '&#9888;',
+    'chart': '&#128200;',
+    'idea': '&#128161;'
+  };
+
+  function showResult(r) {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('result-content').style.display = 'block';
+
+    // Signal
+    var badge = document.getElementById('signal-badge');
+    badge.textContent = r.signal || '--';
+    badge.className = 'signal-badge ' + (r.signal === 'BUY' ? 'buy' : r.signal === 'SELL' ? 'sell' : 'wait');
+
+    // Pair & confidence
+    document.getElementById('pair-name').textContent = (r.pair || '--') + ' - ' + selectedTf;
+    document.getElementById('conf-value').textContent = (r.confidence || '--') + '%';
+
+    // Levels
+    document.getElementById('entry-val').textContent = r.entry || '--';
+    document.getElementById('tp-val').textContent = r.tp || '--';
+    document.getElementById('sl-val').textContent = r.sl || '--';
+    if (r.entry_note) document.getElementById('entry-note').textContent = r.entry_note;
+    if (r.tp_note) document.getElementById('tp-note').textContent = r.tp_note;
+    if (r.sl_note) document.getElementById('sl-note').textContent = r.sl_note;
+
+    // Analysis
+    document.getElementById('analysis-text').textContent = r.analysis || '';
+
+    // Stats
+    document.getElementById('s-pair').textContent = r.pair || '--';
+    document.getElementById('s-rr').textContent = r.rr_ratio || '--';
+    document.getElementById('s-trend').textContent = r.trend || '--';
+    document.getElementById('s-momentum').textContent = r.momentum || '--';
+    document.getElementById('s-setup').textContent = r.setup || '--';
+    document.getElementById('s-structure').textContent = r.structure || '--';
+
+    // Advice
+    if (r.advices && r.advices.length) {
+      var icons = ['&#10003;', '&#9888;', '&#128200;', '&#128161;'];
+      document.getElementById('advice-list').innerHTML = r.advices.map(function(a, i) {
+        var icon = iconMap[a.icon] || icons[i] || '&#9679;';
+        return '<div class="advice-item"><span class="advice-icon">' + icon + '</span><span class="advice-text">' + a.text + '</span></div>';
+      }).join('');
     }
+  }
 
-    function setRunningUI(running) {
-      document.getElementById('btnStart').disabled = running;
-      document.getElementById('btnStop').disabled = !running;
-    }
+  function showError(msg) {
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('empty-state').innerHTML = '<div class="empty-icon" style="color:#ff5577">&#9888;</div><div class="empty-text" style="color:#ff5577;font-size:10px;">' + msg + '</div>';
+    document.getElementById('result-content').style.display = 'none';
+  }
 
-    function toggleCards() {
-      document.getElementById('resultsList').classList.toggle('hidden');
-    }
+</script>
 
-    async function startGeneration() {
-      if (isRunning) return;
-
-      const groqKey = document.getElementById('apiKeyGroq').value.trim();
-      const geminiKey = document.getElementById('apiKeyGemini').value.trim();
-      if (!groqKey) {
-        log('❌ Clé API Groq manquante !', 'error');
-        return;
-      }
-
-      isRunning = true;
-      shouldStop = false;
-      setRunningUI(true);
-      updateStats();
-      document.getElementById('resultsCard').classList.add('hidden');
-
-      const workers = [runWorker('groq', groqKey)];
-      if (geminiKey) {
-        log('🚀 Génération démarrée sur 2 fournisseurs en parallèle (Groq + Gemini)...', 'info');
-        workers.push(runWorker('gemini', geminiKey));
-      } else {
-        log('🚀 Génération démarrée sur Groq...', 'info');
-      }
-
-      await Promise.all(workers);
-
-      isRunning = false;
-      setRunningUI(false);
-      updateStats();
-      finalizeResults();
-      log(`🏁 Arrêté. ${definitions.length} fiche(s) au total.`, 'success');
-    }
-
-    function stopGeneration() {
-      shouldStop = true;
-      log('⏹️ Arrêt demandé, finalisation en cours...', 'info');
-    }
-
-    // Une boucle indépendante par fournisseur ; elles tournent en même temps et partagent knownTerms.
-    async function runWorker(providerKey, apiKey) {
-      const provider = PROVIDERS[providerKey];
-      while (!shouldStop) {
-        let waitMs = 0;
-        try {
-          const res = await fetchValidDefinition(provider, apiKey);
-          if (res) {
-            const k = res.term.toLowerCase();
-            if (!knownTerms.has(k)) {
-              definitions.push(res);
-              knownTerms.add(k);
-              log(`✅ [${provider.label}] "${res.term}" (${res.matiere})`, 'success');
-            } else {
-              log(`↩️ [${provider.label}] "${res.term}" déjà généré, on continue.`, 'info');
-            }
-          }
-        } catch (err) {
-          log(`❌ [${provider.label}] ${err.message}`, 'error');
-          if (err.message.startsWith('RATE_LIMIT:') && !shouldStop) {
-            waitMs = parseInt(err.message.split(':')[1], 10) || 8000;
-            log(`⏳ [${provider.label}] pause de ${(waitMs / 1000).toFixed(1)}s...`, 'error');
-            await sleep(waitMs);
-          } else if (err.message.includes('401') || err.message.toLowerCase().includes('invalid api key') || err.message.toLowerCase().includes('api key not valid')) {
-            log(`🛑 [${provider.label}] clé API invalide, ce fournisseur s'arrête (l'autre continue si actif).`, 'error');
-            return;
-          }
-        }
-        updateStats();
-        if (waitMs === 0 && !shouldStop) await sleep(1500);
-      }
-    }
-
-    function finalizeResults() {
-      document.getElementById('resultsCard').classList.remove('hidden');
-      document.getElementById('resultsCount').textContent = definitions.length;
-      document.getElementById('jsonOutput').value = JSON.stringify(definitions, null, 2);
-      const list = document.getElementById('resultsList');
-      list.innerHTML = '';
-      definitions.forEach(def => {
-        const card = document.createElement('div');
-        card.className = 'definition-card';
-        card.innerHTML = `
-          <span class="badge">${escapeHTML(def.matiere)}</span>
-          <div class="term-title">${escapeHTML(def.term)}</div>
-          <div class="term-def">${escapeHTML(def.def)}</div>
-          ${def.example ? `<div class="term-sub">💡 Exemple : ${escapeHTML(def.example)}</div>` : ''}
-          ${def.remember ? `<div class="term-sub">🧠 Astuce : ${escapeHTML(def.remember)}</div>` : ''}
-        `;
-        list.appendChild(card);
-      });
-      document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    async function fetchValidDefinition(provider, apiKey) {
-      let lastErr;
-      for (const model of provider.models) {
-        try {
-          return await fetchValidFromModel(provider, apiKey, model);
-        } catch (err) {
-          lastErr = err;
-          const msg = err.message.toLowerCase();
-          if (msg.includes('404') || msg.includes('does not exist') || msg.includes('decommissioned') || msg.includes('not found')) {
-            log(`↪️ [${provider.label}] modèle "${model}" indisponible, essai suivant...`, 'info');
-            continue;
-          }
-          throw err; // rate limit / 401 / réseau -> pas de fallback de modèle, on remonte
-        }
-      }
-      throw lastErr;
-    }
-
-    // Redemande une fiche tant que la matière renvoyée n'est pas une des 4 valides (max 2 tentatives)
-    async function fetchValidFromModel(provider, apiKey, model) {
-      let lastParsed = null;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        const parsed = await callProvider(provider, apiKey, model);
-        const normalized = normalizeMatiere(parsed.matiere);
-        if (normalized) {
-          parsed.matiere = normalized;
-          return parsed;
-        }
-        lastParsed = parsed;
-      }
-      throw new Error(`Matière invalide reçue : "${lastParsed?.matiere}"`);
-    }
-
-    function normalizeMatiere(m) {
-      if (!m) return null;
-      const clean = m.trim().toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const map = { 'management': 'Management', 'droit': 'Droit', 'economie': 'Économie', 'rh': 'RH', 'ressources humaines': 'RH' };
-      return map[clean] || null;
-    }
-
-    async function callProvider(provider, apiKey, model) {
-      const recent = Array.from(knownTerms).slice(-10);
-
-      const systemPrompt = `Tu es un rédacteur de contenu pédagogique spécialisé pour la filière STMG (lycée français).
-À chaque appel, choisis TOI-MÊME un terme ou une notion du programme STMG qui n'est PAS dans la liste des termes déjà traités, et génère sa fiche.
-La matière DOIT être EXACTEMENT l'une de ces 4 valeurs, sans variante ni sous-catégorie : "Management", "Droit", "Économie", "RH".
-Varie les matières et le niveau de difficulté au fil des appels.
-Termes déjà traités récemment (à éviter) : ${recent.length ? recent.join(', ') : 'aucun'}.
-
-Réponds STRICTEMENT au format JSON suivant, sans aucun texte hors du JSON :
-{
-  "term": "nom du terme choisi",
-  "matiere": "Management" | "Droit" | "Économie" | "RH",
-  "def": "Définition courte et claire (2-3 phrases max)",
-  "example": "Exemple concret (1 phrase) ou chaîne vide si inutile",
-  "remember": "Moyen mnémotechnique ou idée-clé"
-}`;
-
-      const userPrompt = `Propose un nouveau terme STMG et génère sa fiche.`;
-
-      const body = {
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.9
-      };
-      body[provider.useMaxTokensField] = 400;
-
-      let response;
-      try {
-        response = await fetch(provider.url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-      } catch (networkErr) {
-        throw new Error(`Réseau : impossible de joindre l'API (${networkErr.message})`);
-      }
-
-      if (!response.ok) {
-        let errMsg = `HTTP ${response.status}`;
-        let rawErrorText = '';
-        try {
-          const errorData = await response.json();
-          // On garde le JSON complet (rawErrorText) pour repérer un éventuel "retryDelay" imbriqué
-          // (c'est là que Gemini le place, pas dans .error.message), et le message lisible pour l'affichage.
-          rawErrorText = JSON.stringify(errorData);
-          const readableMsg = errorData?.error?.message;
-          if (readableMsg) errMsg = readableMsg + ` (${response.status})`;
-        } catch (e) { }
-
-        if (response.status === 429) {
-          const waitMs = parseRetryAfter(rawErrorText) ?? 8000;
-          throw new Error(`RATE_LIMIT:${waitMs}:${errMsg}`);
-        }
-        throw new Error(errMsg);
-      }
-
-      const data = await response.json();
-      const content = data?.choices?.[0]?.message?.content;
-      if (!content) throw new Error("Réponse vide ou mal formée de l'API.");
-
-      let parsed;
-      try { parsed = JSON.parse(content); }
-      catch (e) { throw new Error("Le modèle n'a pas renvoyé un JSON valide."); }
-
-      if (!parsed.term || !parsed.def || !parsed.matiere) throw new Error('JSON incomplet renvoyé par le modèle.');
-      return parsed;
-    }
-
-    function parseRetryAfter(text) {
-      if (!text) return null;
-      // Groq : "try again in 22.5ms" / "try again in 6m 11.52s" / "try again in 3.2s"
-      // Gemini : souvent "retryDelay":"38s" dans les détails de l'erreur
-      const retryDelayMatch = text.match(/retryDelay"\s*:\s*"([\d.]+)s"/);
-      if (retryDelayMatch) return parseFloat(retryDelayMatch[1]) * 1000;
-      const mMatch = text.match(/(\d+)m\s*([\d.]+)s/);
-      if (mMatch) return (parseInt(mMatch[1], 10) * 60 + parseFloat(mMatch[2])) * 1000;
-      const sMatch = text.match(/([\d.]+)s\b/);
-      if (sMatch) return parseFloat(sMatch[1]) * 1000;
-      const msMatch = text.match(/([\d.]+)ms\b/);
-      if (msMatch) return parseFloat(msMatch[1]);
-      return null;
-    }
-
-    function escapeHTML(str) {
-      const div = document.createElement('div');
-      div.textContent = str ?? '';
-      return div.innerHTML;
-    }
-
-    function copyJSON() {
-      const json = document.getElementById('jsonOutput').value;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(json)
-          .then(() => log('📋 JSON copié dans le presse-papier.', 'success'))
-          .catch(() => fallbackCopy(json));
-      } else {
-        fallbackCopy(json);
-      }
-    }
-
-    function fallbackCopy(text) {
-      const ta = document.getElementById('jsonOutput');
-      ta.focus();
-      ta.select();
-      try {
-        document.execCommand('copy');
-        log('📋 JSON copié dans le presse-papier.', 'success');
-      } catch (e) {
-        log('❌ Impossible de copier automatiquement. Sélectionnez le texte manuellement.', 'error');
-      }
-    }
-
-    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-    initStorage();
-  </script>
 </body>
 </html>
